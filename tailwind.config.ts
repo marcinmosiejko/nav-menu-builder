@@ -26,8 +26,12 @@ export default {
         },
         border: {
           DEFAULT: "hsl(var(--border))",
+          secondary: "hsl(var(--border-secondary))",
         },
-
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
         button: {
           primary: {
             DEFAULT: "hsl(var(--primary))",
