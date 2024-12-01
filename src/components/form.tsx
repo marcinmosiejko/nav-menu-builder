@@ -161,8 +161,8 @@ const isFormArrayField = (
 type FormFieldError = FieldError | ArrayFieldError | undefined;
 
 const FormMessage = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
 >(({ className, children, ...props }, ref) => {
   const { error, formMessageId } = useFormField();
 
@@ -177,19 +177,30 @@ const FormMessage = React.forwardRef<
     body = String(extendedError.message);
   }
 
-  if (!body) {
-    return null;
-  }
+  const [height, setHeight] = React.useState(0);
+  const contentRef = React.useRef<HTMLDivElement | null>(null);
+
+  React.useEffect(() => {
+    if (contentRef.current) {
+      const contentHeight = contentRef.current.scrollHeight;
+      setHeight(body ? contentHeight : 0);
+    }
+  }, [body]);
 
   return (
-    <p
+    <div
       ref={ref}
       id={formMessageId}
-      className={cn("text-destructive text-sm font-medium", className)}
+      className={cn(
+        "text-destructive overflow-hidden text-sm font-medium transition-all duration-300",
+        className,
+      )}
+      aria-hidden={!body ? "true" : undefined}
+      style={{ height: `${height}px` }}
       {...props}
     >
-      {body}
-    </p>
+      <div ref={contentRef}>{body}</div>
+    </div>
   );
 });
 FormMessage.displayName = "FormMessage";
