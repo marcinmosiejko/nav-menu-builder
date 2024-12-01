@@ -1,7 +1,8 @@
 import { Button } from "@/components/button";
 import { ButtonWithConfirm } from "@/components/button-with-confirm";
 import { useFormContext, useFormState } from "react-hook-form";
-import { getMenuStateFromLocalStorage } from "./page";
+import { getStateFromLocalStorage, STORAGE_KEY } from "./nav-menu-builder";
+import { MenuItems } from "./schema";
 
 export const SubmitButtons = () => {
   const { control, reset } = useFormContext();
@@ -23,7 +24,7 @@ export const SubmitButtons = () => {
           </Button>
         }
         onConfirm={() => {
-          const data = getMenuStateFromLocalStorage();
+          const data = getStateFromLocalStorage<MenuItems>(STORAGE_KEY);
           reset(data);
         }}
         description="Anulowanie oznacza usunięcie wszelkich zmian dokonanych od ostatniego zapisania."
