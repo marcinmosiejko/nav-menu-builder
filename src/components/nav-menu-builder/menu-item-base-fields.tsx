@@ -9,7 +9,7 @@ import { Input } from "@/components/input";
 import { InputWithIcon } from "@/components/input-with-icon";
 import SearchIcon from "@/components/icons/search-icon";
 import { useFormContext } from "react-hook-form";
-import { MenuItems } from "./schema";
+import { type MenuItems } from "./schema";
 
 export const MenuItemBaseFields: React.FC<{
   nameFieldProps: { label: string; placeholder: string; name: "name" };

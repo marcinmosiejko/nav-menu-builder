@@ -1,5 +1,5 @@
 import { useFieldArray, UseFormReturn } from "react-hook-form";
-import { MenuItem } from "./page";
+import { MenuItem } from "./schema";
 
 const emptyMenuItem = {
   name: "",
