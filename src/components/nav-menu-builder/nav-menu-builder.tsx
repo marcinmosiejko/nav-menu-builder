@@ -37,8 +37,12 @@ export const NavMenuBuilder = () => {
   const { fields, appendItem, removeItem } = useMenuItemsArray(form);
 
   const onSubmit = (values: MenuItems) => {
+    setPreventEditingState(true);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
     reset(values);
+    setTimeout(() => {
+      setPreventEditingState(false);
+    }, 0);
   };
 
   const hasItems = !!getValues().items.length;
