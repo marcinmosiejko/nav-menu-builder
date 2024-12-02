@@ -36,11 +36,10 @@ const useMenuItemStats = (path: MenuItemsPath) => {
   };
 };
 
-const AddOrSaveButton: FC<{
-  value: BaseMenu | null;
+const AddButton: FC<{
   onClick: () => void;
   path: MenuItemsPath;
-}> = ({ onClick, value, path }) => {
+}> = ({ onClick, path }) => {
   const { control } = useFormContext<MenuItems>();
   const item = useWatch({
     control,
@@ -49,7 +48,7 @@ const AddOrSaveButton: FC<{
   const isValid = baseMenuItemSchema.safeParse(item).success;
   return (
     <Button onClick={onClick} variant="secondary-color" disabled={!isValid}>
-      {value ? "Zapisz" : "Dodaj"}
+      {"Dodaj"}
     </Button>
   );
 };
@@ -115,11 +114,7 @@ const MenuItemEditor: FC<{
         >
           Anuluj
         </Button>
-        <AddOrSaveButton
-          value={valueBeforeEditing}
-          path={path}
-          onClick={() => setIsEditing(false)}
-        />
+        <AddButton path={path} onClick={() => setIsEditing(false)} />
       </div>
       <ButtonWithConfirm
         TriggerBody={
@@ -170,8 +165,8 @@ const MenuItemDisplay: FC<{
       <div className="flex items-center gap-4">
         <ArrowsCrossIcon />
         <div className="flex flex-col gap-2 text-sm">
-          <span className="font-semibold">{value?.name || ""}</span>
-          <span className="text-foreground-tertiary">{value?.link || ""}</span>
+          <span className="font-semibold">{value.name}</span>
+          <span className="text-foreground-tertiary">{value.link}</span>
         </div>
       </div>
       <div>
@@ -179,8 +174,8 @@ const MenuItemDisplay: FC<{
           className="rounded-r-none border-r-transparent focus-visible:relative"
           onClick={() => {
             setValueBeforeEditing({
-              name: value?.name || "",
-              link: value?.link || "",
+              name: value.name,
+              link: value.link,
             });
             setIsEditing(true);
           }}

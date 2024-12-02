@@ -86,13 +86,12 @@ export const NavMenuBuilder = () => {
               {hasItems ? (
                 <div className="w-full">
                   {fields.map((field, index) => (
-                    <div className="w-full" key={field.id}>
-                      <MenuItem
-                        path={`items.${index}` as MenuItemsPath}
-                        removeItem={removeItem(index)}
-                        preventEditingState={preventEditingState}
-                      />
-                    </div>
+                    <MenuItem
+                      key={field.id}
+                      path={`items.${index}` as MenuItemsPath}
+                      removeItem={removeItem(index)}
+                      preventEditingState={preventEditingState}
+                    />
                   ))}
                   <div className="bg-background-tertiary border-border-secondary rounded-md rounded-t-none border-t">
                     <Button
