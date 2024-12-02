@@ -47,7 +47,7 @@ export const NavMenuBuilder = () => {
   }, [reset]);
 
   return (
-    <div>
+    <div className="space-y-6">
       <h1 className="text-2xl font-bold">Dodaj nawigację</h1>
       <Form {...form}>
         <form
