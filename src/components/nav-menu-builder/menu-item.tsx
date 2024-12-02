@@ -12,21 +12,25 @@ import { Button } from "@/components/button";
 import { ButtonWithConfirm } from "@/components/button-with-confirm";
 import BinIcon from "@/components/icons/bin-icon";
 import ArrowsCrossIcon from "@/components/icons/arrows-cross-icon";
-import { useFormContext, useWatch } from "react-hook-form";
+import { UseFieldArrayRemove, useFormContext, useWatch } from "react-hook-form";
+import {
+  DnDSortableContextWrap,
+  useSortsableExtended,
+} from "./dnd-sorting-context-wrap";
 
 type MenuItemStats = ReturnType<typeof useMenuItemStats>;
 const useMenuItemStats = (path: MenuItemsPath) => {
   const form = useFormContext<MenuItems>();
   const parentItemsCount =
     form.getValues(
-      (path.split(".").slice(0, -2).join(".") || undefined) as `items.0`,
-    ).items?.length || 1;
+      (path.split(".").slice(0, -2).join(".") || undefined) as MenuItemsPath,
+    )?.items?.length || 1;
   const depth = path.split(".").length / 2;
   const itemIndex = Number(path.split(".").at(-1)!);
   const isItemFirst = itemIndex === 0;
   const isItemLast = itemIndex === parentItemsCount - 1;
-  const hasChildren = !!form.getValues((path || undefined) as `items.0`).items
-    .length;
+  const hasChildren = !!form.getValues((path || undefined) as MenuItemsPath)
+    ?.items.length;
   return {
     depth,
     isItemFirst,
@@ -140,6 +144,7 @@ const MenuItemDisplay: FC<{
   path: MenuItemsPath;
   appendItem: () => void;
   menuItemStats: MenuItemStats;
+  sortable: ReturnType<typeof useSortsableExtended>;
 }> = ({
   setValueBeforeEditing,
   setIsEditing,
@@ -147,10 +152,13 @@ const MenuItemDisplay: FC<{
   path,
   appendItem,
   menuItemStats,
+  sortable,
 }) => {
   const form = useFormContext<MenuItems>();
   const value = form.getValues(path);
   const { depth, isItemFirst, hasChildren, isItemLast } = menuItemStats;
+  const { attributes, listeners, setNodeRef, transform, style } = sortable;
+
   return (
     <div
       className={cn(
@@ -160,13 +168,17 @@ const MenuItemDisplay: FC<{
         depth > 1 && "mx-0 border-r-0",
         depth > 1 && (hasChildren || isItemLast) && "rounded-bl-md",
         hasChildren && "mb-0 border-b",
+        transform && "border border-r-0",
       )}
+      style={style}
     >
       <div className="flex items-center gap-4">
-        <ArrowsCrossIcon />
+        <span ref={setNodeRef} {...listeners} {...attributes}>
+          <ArrowsCrossIcon />
+        </span>
         <div className="flex flex-col gap-2 text-sm">
-          <span className="font-semibold">{value.name}</span>
-          <span className="text-foreground-tertiary">{value.link}</span>
+          <span className="font-semibold">{value?.name}</span>
+          <span className="text-foreground-tertiary">{value?.link}</span>
         </div>
       </div>
       <div>
@@ -207,30 +219,28 @@ const MenuItemDisplay: FC<{
   );
 };
 
-export const MenuItem = ({
-  path,
-  removeItem,
-  preventEditingState,
-}: {
+export const MenuItem: FC<{
   path: MenuItemsPath;
-  removeItem: () => void;
+  removeItem: UseFieldArrayRemove;
   preventEditingState: boolean;
-}) => {
+}> = ({ path, removeItem, preventEditingState }) => {
   const [isEditing, setIsEditing] = useState(
     preventEditingState ? false : true,
   );
   const [valueBeforeEditing, setValueBeforeEditing] = useState<BaseMenu | null>(
     null,
   );
+
   const form = useFormContext<MenuItems>();
-  const {
-    fields,
-    appendItem,
-    removeItem: removeChildItem,
-  } = useMenuItemsArray(form, path);
+  const arrayField = useMenuItemsArray(form, path);
+  const { fields, appendItem, remove: removeChild, swap } = arrayField;
+
   const menuItemStats = useMenuItemStats(path);
   const { depth } = menuItemStats;
 
+  const sortable = useSortsableExtended({
+    id: path,
+  });
   return (
     <div className={cn("flex flex-col rounded-none", depth > 1 && "ml-16")}>
       {isEditing ? (
@@ -250,18 +260,22 @@ export const MenuItem = ({
           setIsEditing={setIsEditing}
           setValueBeforeEditing={setValueBeforeEditing}
           valueBeforeEditing={valueBeforeEditing}
+          sortable={sortable}
         />
       )}
+
       <div className="bg-background-secondary">
-        {fields.map((field, index) => (
-          <div key={field.id}>
-            <MenuItem
-              path={`${path}.items.${index}` as MenuItemsPath}
-              removeItem={removeChildItem(index)}
-              preventEditingState={preventEditingState}
-            />
-          </div>
-        ))}
+        <DnDSortableContextWrap fields={fields} path={path} swap={swap}>
+          {fields.map((field, index) => (
+            <div key={field.id} style={sortable.style}>
+              <MenuItem
+                path={`${path}.items.${index}` as MenuItemsPath}
+                removeItem={() => removeChild(index)}
+                preventEditingState={preventEditingState}
+              />
+            </div>
+          ))}
+        </DnDSortableContextWrap>
       </div>
     </div>
   );
