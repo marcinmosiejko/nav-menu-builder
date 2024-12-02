@@ -11,6 +11,7 @@ import { MenuItemBaseFields } from "./menu-item-base-fields";
 import { MenuItem } from "./menu-item";
 import { SubmitButtons } from "./submit-buttons";
 import { MenuItems, MenuItemsPath, menuItemsSchema } from "./schema";
+import { toast } from "sonner";
 
 export const STORAGE_KEY = "menuItems";
 
@@ -43,6 +44,7 @@ export const NavMenuBuilder = () => {
     setTimeout(() => {
       setPreventEditingState(false);
     }, 0);
+    toast.success("Your changes have been successfully saved!");
   };
 
   const hasItems = !!getValues().items.length;
