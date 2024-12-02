@@ -10,8 +10,12 @@ import { useMenuItemsArray } from "./useMenuItemsArray";
 import { MenuItemBaseFields } from "./menu-item-base-fields";
 import { MenuItem } from "./menu-item";
 import { SubmitButtons } from "./submit-buttons";
-import { MenuItems, MenuItemsPath, menuItemsSchema } from "./schema";
+import { type MenuItems, type MenuItemsPath, menuItemsSchema } from "./schema";
 import { toast } from "sonner";
+import {
+  DnDSortableContextWrap,
+  useSortsableExtended,
+} from "./dnd-sorting-context-wrap";
 
 export const STORAGE_KEY = "menuItems";
 
@@ -19,6 +23,8 @@ export const getStateFromLocalStorage = <T,>(storageKey: string) => {
   const savedData = localStorage.getItem(storageKey);
   return savedData ? (JSON.parse(savedData) as T) : undefined;
 };
+
+const topMenuItemPath = "" as MenuItemsPath;
 
 export const NavMenuBuilder = () => {
   const form = useForm<MenuItems>({
@@ -34,8 +40,10 @@ export const NavMenuBuilder = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [preventEditingState, setPreventEditingState] = useState(true);
+
   const { reset, getValues } = form;
-  const { fields, appendItem, removeItem } = useMenuItemsArray(form);
+  const arrayField = useMenuItemsArray(form, topMenuItemPath);
+  const { fields, appendItem, remove, swap } = arrayField;
 
   const onSubmit = (values: MenuItems) => {
     setPreventEditingState(true);
@@ -56,7 +64,11 @@ export const NavMenuBuilder = () => {
     setTimeout(() => {
       setPreventEditingState(false);
     }, 0);
-  }, [reset]);
+  }, [reset, setPreventEditingState]);
+
+  const sortable = useSortsableExtended({
+    id: topMenuItemPath,
+  });
 
   // No skeleton for this as data loads too quickly for it to make sense. But it prevents from rendering empty form for a split second before the data comes in.
   if (isLoading) return null;
@@ -85,14 +97,22 @@ export const NavMenuBuilder = () => {
             <div className="bg-background-secondary border-border flex flex-col items-center justify-center gap-4 rounded-md border">
               {hasItems ? (
                 <div className="w-full">
-                  {fields.map((field, index) => (
-                    <MenuItem
-                      key={field.id}
-                      path={`items.${index}` as MenuItemsPath}
-                      removeItem={removeItem(index)}
-                      preventEditingState={preventEditingState}
-                    />
-                  ))}
+                  <DnDSortableContextWrap
+                    fields={fields}
+                    path={topMenuItemPath}
+                    swap={swap}
+                  >
+                    {fields.map((field, index) => (
+                      <div key={field.id} style={sortable.style}>
+                        <MenuItem
+                          key={field.id}
+                          path={`items.${index}` as MenuItemsPath}
+                          removeItem={() => remove(index)}
+                          preventEditingState={preventEditingState}
+                        />{" "}
+                      </div>
+                    ))}
+                  </DnDSortableContextWrap>
                   <div className="bg-background-tertiary border-border-secondary rounded-md rounded-t-none border-t">
                     <Button
                       className="m-6"
