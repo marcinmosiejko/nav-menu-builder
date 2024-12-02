@@ -31,6 +31,7 @@ export const NavMenuBuilder = () => {
       items: [],
     },
   });
+  const [isLoading, setIsLoading] = useState(true);
   const [preventEditingState, setPreventEditingState] = useState(true);
   const { reset, getValues } = form;
   const { fields, appendItem, removeItem } = useMenuItemsArray(form);
@@ -45,10 +46,14 @@ export const NavMenuBuilder = () => {
   useEffect(() => {
     const data = getStateFromLocalStorage<MenuItems>(STORAGE_KEY);
     if (data) reset(data);
+    setIsLoading(false);
     setTimeout(() => {
       setPreventEditingState(false);
     }, 0);
   }, [reset]);
+
+  // No skeleton for this as data loads too quickly for it to make sense. But it prevents from rendering empty form for a split second before the data comes in.
+  if (isLoading) return null;
 
   return (
     <div className="space-y-6">
