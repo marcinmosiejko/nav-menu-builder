@@ -5,7 +5,7 @@ import PlusIcon from "@/components/icons/plus-icon";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useMenuItemsArray } from "./useMenuItemsArray";
 import { MenuItemBaseFields } from "./menu-item-base-fields";
 import { MenuItem } from "./menu-item";
@@ -31,6 +31,7 @@ export const NavMenuBuilder = () => {
       items: [],
     },
   });
+  const [preventEditingState, setPreventEditingState] = useState(true);
   const { reset, getValues } = form;
   const { fields, appendItem, removeItem } = useMenuItemsArray(form);
 
@@ -44,6 +45,9 @@ export const NavMenuBuilder = () => {
   useEffect(() => {
     const data = getStateFromLocalStorage<MenuItems>(STORAGE_KEY);
     if (data) reset(data);
+    setTimeout(() => {
+      setPreventEditingState(false);
+    }, 0);
   }, [reset]);
 
   return (
@@ -75,6 +79,7 @@ export const NavMenuBuilder = () => {
                       <MenuItem
                         path={`items.${index}` as MenuItemsPath}
                         removeItem={removeItem(index)}
+                        preventEditingState={preventEditingState}
                       />
                     </div>
                   ))}

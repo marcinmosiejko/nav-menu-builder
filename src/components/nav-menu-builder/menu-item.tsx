@@ -215,11 +215,15 @@ const MenuItemDisplay: FC<{
 export const MenuItem = ({
   path,
   removeItem,
+  preventEditingState,
 }: {
   path: MenuItemsPath;
   removeItem: () => void;
+  preventEditingState: boolean;
 }) => {
-  const [isEditing, setIsEditing] = useState(true);
+  const [isEditing, setIsEditing] = useState(
+    preventEditingState ? false : true,
+  );
   const [valueBeforeEditing, setValueBeforeEditing] = useState<BaseMenu | null>(
     null,
   );
@@ -259,6 +263,7 @@ export const MenuItem = ({
             <MenuItem
               path={`${path}.items.${index}` as MenuItemsPath}
               removeItem={removeChildItem(index)}
+              preventEditingState={preventEditingState}
             />
           </div>
         ))}
