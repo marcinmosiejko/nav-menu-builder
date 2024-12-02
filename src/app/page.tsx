@@ -4,7 +4,7 @@ import { NavMenuBuilder } from "@/components/nav-menu-builder/nav-menu-builder";
 
 export default function NavMenuBuilderPage() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="space-y-6">
       <nav>
         <Button variant="neutral" className="px-0">
           <ArrowLeftIcon />
