@@ -27,7 +27,13 @@ const useMenuItemStats = (path: MenuItemsPath) => {
   const isItemLast = itemIndex === parentItemsCount - 1;
   const hasChildren = !!form.getValues((path || undefined) as `items.0`).items
     .length;
-  return { depth, isItemFirst, isItemLast, hasChildren };
+  return {
+    depth,
+    isItemFirst,
+    isItemLast,
+    hasChildren,
+    hasSiblings: parentItemsCount > 1,
+  };
 };
 
 const AddOrSaveButton: FC<{
@@ -65,13 +71,19 @@ const MenuItemEditor: FC<{
   menuItemStats,
 }) => {
   const form = useFormContext<MenuItems>();
-  const { depth, isItemFirst } = menuItemStats;
+  const { depth, isItemFirst, hasSiblings, hasChildren } = menuItemStats;
+
   return (
     <div
       className={cn(
         "bg-background border-border relative flex flex-col gap-4 rounded-md py-4 pl-6 pr-24",
-        depth > 1 && "m-6 border",
+        depth > 1 && "m-6 ml-0 border",
         depth === 1 && !isItemFirst && "m-6 border",
+        depth === 1 &&
+          isItemFirst &&
+          valueBeforeEditing &&
+          (hasChildren || hasSiblings) &&
+          "m-6 border",
       )}
     >
       <div className="flex flex-col gap-2">
@@ -221,12 +233,7 @@ export const MenuItem = ({
   const { depth } = menuItemStats;
 
   return (
-    <div
-      className={cn(
-        "flex flex-col rounded-none",
-        depth > 1 && !isEditing && "ml-16",
-      )}
-    >
+    <div className={cn("flex flex-col rounded-none", depth > 1 && "ml-16")}>
       {isEditing ? (
         <MenuItemEditor
           menuItemStats={menuItemStats}
