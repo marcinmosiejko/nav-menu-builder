@@ -1,6 +1,6 @@
 import { Button } from "@/components/button";
 import { ButtonWithConfirm } from "@/components/button-with-confirm";
-import { useFormContext, useFormState } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import { MenuItem as MenuItemT } from "./schema";
 import { FC } from "react";
 import { getStateFromLocalStorage } from "@/lib/utils";
@@ -8,20 +8,13 @@ import { getStateFromLocalStorage } from "@/lib/utils";
 export const FormSubmitButtons: FC<{ storageKey: string }> = ({
   storageKey,
 }) => {
-  const { control, reset } = useFormContext();
-  const formValues = useFormState({
-    control,
-  });
+  const { reset } = useFormContext();
 
   return (
     <div className="flex justify-end gap-2">
       <ButtonWithConfirm
         TriggerBody={
-          <Button
-            type="reset"
-            variant="secondary"
-            disabled={!formValues.isDirty}
-          >
+          <Button type="reset" variant="secondary">
             Anuluj
           </Button>
         }
@@ -32,7 +25,7 @@ export const FormSubmitButtons: FC<{ storageKey: string }> = ({
         description="Anulowanie oznacza usunięcie wszelkich zmian dokonanych od ostatniego zapisania."
       />
 
-      <Button type="submit" variant="primary" disabled={!formValues.isDirty}>
+      <Button type="submit" variant="primary">
         Zapisz
       </Button>
     </div>
