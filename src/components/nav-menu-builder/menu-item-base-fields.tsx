@@ -16,6 +16,13 @@ export const MenuItemBaseFields: React.FC<{
   linkFieldProps: { name: "link" };
 }> = ({ nameFieldProps, linkFieldProps }) => {
   const form = useFormContext<MenuItemT>();
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // 'Enter' keydown in input triggers onClick of an edit button of the first menu item, not sure why this would happen
+    // This fixes the issue
+    if (e.key === "Enter") e.preventDefault();
+  };
+
   return (
     <>
       <FormField
@@ -25,7 +32,11 @@ export const MenuItemBaseFields: React.FC<{
           <FormItem>
             <FormLabel>{nameFieldProps.label}</FormLabel>
             <FormControl>
-              <Input placeholder={nameFieldProps.placeholder} {...field} />
+              <Input
+                placeholder={nameFieldProps.placeholder}
+                {...field}
+                onKeyDown={onKeyDown}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -39,6 +50,7 @@ export const MenuItemBaseFields: React.FC<{
             <FormLabel>Link</FormLabel>
             <FormControl>
               <InputWithIcon
+                onKeyDown={onKeyDown}
                 placeholder="Wklej lub wyszukaj"
                 {...field}
                 Icon={SearchIcon}
