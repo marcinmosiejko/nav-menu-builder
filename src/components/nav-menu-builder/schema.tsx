@@ -14,5 +14,4 @@ export type BaseMenu = z.infer<typeof baseMenuItemSchema>;
 export type MenuItem = BaseMenu & {
   items: MenuItem[];
 };
-export type MenuItemsPath = "items.0";
-export type MenuItems = z.infer<typeof menuItemsSchema>;
+export type MenuItemPath = "items.0";

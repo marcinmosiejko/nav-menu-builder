@@ -9,13 +9,13 @@ import { Input } from "@/components/input";
 import { InputWithIcon } from "@/components/input-with-icon";
 import SearchIcon from "@/components/icons/search-icon";
 import { useFormContext } from "react-hook-form";
-import { type MenuItems } from "./schema";
+import { type MenuItem as MenuItemT } from "./schema";
 
 export const MenuItemBaseFields: React.FC<{
   nameFieldProps: { label: string; placeholder: string; name: "name" };
   linkFieldProps: { name: "link" };
 }> = ({ nameFieldProps, linkFieldProps }) => {
-  const form = useFormContext<MenuItems>();
+  const form = useFormContext<MenuItemT>();
   return (
     <>
       <FormField

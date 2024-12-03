@@ -1,5 +1,5 @@
 import { useFieldArray, UseFormReturn } from "react-hook-form";
-import { MenuItem, MenuItemsPath } from "./schema";
+import { MenuItem as MenuItemT, MenuItemPath } from "./schema";
 import { useCallback } from "react";
 
 const emptyMenuItem = {
@@ -9,17 +9,17 @@ const emptyMenuItem = {
 };
 
 export const useMenuItemsArray = (
-  form: UseFormReturn<MenuItem, unknown, undefined>,
-  path: MenuItemsPath,
+  form: UseFormReturn<MenuItemT, unknown, undefined>,
+  path: MenuItemPath,
 ) => {
   const { fields, append, ...rest } = useFieldArray({
     name: `${path}.items` as "items",
     control: form.control,
   });
 
-  const appendItem = useCallback(() => {
+  const appendEmptyItem = useCallback(() => {
     append(emptyMenuItem);
   }, [append]);
 
-  return { fields, appendItem, append, ...rest };
+  return { fields, appendEmptyItem, append, ...rest };
 };

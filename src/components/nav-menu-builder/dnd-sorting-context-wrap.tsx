@@ -14,7 +14,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { FC, ReactNode } from "react";
-import { MenuItem, MenuItemsPath } from "./schema";
+import { MenuItem as MenuItemT, MenuItemPath } from "./schema";
 import { FieldArrayWithId, UseFieldArraySwap } from "react-hook-form";
 import { CSS } from "@dnd-kit/utilities";
 
@@ -33,8 +33,8 @@ const DndContextWrap: FC<{ children: ReactNode; swap: UseFieldArraySwap }> = ({
     const { active, over } = event;
 
     if (over?.id && active.id !== over.id) {
-      const activePath = active.id as MenuItemsPath;
-      const overPath = over.id as MenuItemsPath;
+      const activePath = active.id as MenuItemPath;
+      const overPath = over.id as MenuItemPath;
       const activeIndex = parseInt(activePath.split(".").at(-1)!, 10);
       const overIndex = parseInt(overPath.split(".").at(-1)!, 10);
       swap(activeIndex, overIndex);
@@ -53,8 +53,8 @@ const DndContextWrap: FC<{ children: ReactNode; swap: UseFieldArraySwap }> = ({
 };
 
 const SortableContextWrap: FC<{
-  path: MenuItemsPath;
-  fields: FieldArrayWithId<MenuItem, "items", "id">[];
+  path: MenuItemPath;
+  fields: FieldArrayWithId<MenuItemT, "items", "id">[];
   children: ReactNode;
 }> = ({ path, fields, children }) => {
   return (
@@ -70,8 +70,8 @@ const SortableContextWrap: FC<{
 };
 
 export const DnDSortableContextWrap: FC<{
-  path: MenuItemsPath;
-  fields: FieldArrayWithId<MenuItem, "items", "id">[];
+  path: MenuItemPath;
+  fields: FieldArrayWithId<MenuItemT, "items", "id">[];
   children: ReactNode;
   swap: UseFieldArraySwap;
 }> = ({ swap, ...rest }) => {

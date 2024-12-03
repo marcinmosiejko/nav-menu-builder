@@ -2,8 +2,8 @@ import { Dispatch, FC, SetStateAction, useState } from "react";
 import {
   baseMenuItemSchema,
   BaseMenu,
-  MenuItems,
-  MenuItemsPath,
+  MenuItem as MenuItemT,
+  MenuItemPath,
 } from "@/components/nav-menu-builder/schema";
 import { useMenuItemsArray } from "./useMenuItemsArray";
 import { cn } from "@/lib/utils";
@@ -19,17 +19,17 @@ import {
 } from "./dnd-sorting-context-wrap";
 
 type MenuItemStats = ReturnType<typeof useMenuItemStats>;
-const useMenuItemStats = (path: MenuItemsPath) => {
-  const form = useFormContext<MenuItems>();
+const useMenuItemStats = (path: MenuItemPath) => {
+  const form = useFormContext<MenuItemT>();
   const parentItemsCount =
     form.getValues(
-      (path.split(".").slice(0, -2).join(".") || undefined) as MenuItemsPath,
+      (path.split(".").slice(0, -2).join(".") || undefined) as MenuItemPath,
     )?.items?.length || 1;
   const depth = path.split(".").length / 2;
   const itemIndex = Number(path.split(".").at(-1)!);
   const isItemFirst = itemIndex === 0;
   const isItemLast = itemIndex === parentItemsCount - 1;
-  const hasChildren = !!form.getValues((path || undefined) as MenuItemsPath)
+  const hasChildren = !!form.getValues((path || undefined) as MenuItemPath)
     ?.items.length;
   return {
     depth,
@@ -42,9 +42,9 @@ const useMenuItemStats = (path: MenuItemsPath) => {
 
 const AddButton: FC<{
   onClick: () => void;
-  path: MenuItemsPath;
+  path: MenuItemPath;
 }> = ({ onClick, path }) => {
-  const { control } = useFormContext<MenuItems>();
+  const { control } = useFormContext<MenuItemT>();
   const item = useWatch({
     control,
     name: path,
@@ -63,7 +63,7 @@ const confirmRemoveDescription =
 const MenuItemEditor: FC<{
   valueBeforeEditing: BaseMenu | null;
   setIsEditing: Dispatch<SetStateAction<boolean>>;
-  path: MenuItemsPath;
+  path: MenuItemPath;
   removeItem: () => void;
   menuItemStats: MenuItemStats;
 }> = ({
@@ -73,7 +73,7 @@ const MenuItemEditor: FC<{
   removeItem,
   menuItemStats,
 }) => {
-  const form = useFormContext<MenuItems>();
+  const form = useFormContext<MenuItemT>();
   const { depth, isItemFirst, hasSiblings, hasChildren } = menuItemStats;
 
   return (
@@ -106,7 +106,7 @@ const MenuItemEditor: FC<{
           variant="secondary"
           onClick={() => {
             if (valueBeforeEditing) {
-              form.setValue(path as MenuItemsPath, {
+              form.setValue(path as MenuItemPath, {
                 ...valueBeforeEditing,
                 items: form.getValues(`${path}.items` as "items"),
               });
@@ -141,8 +141,8 @@ const MenuItemDisplay: FC<{
   setValueBeforeEditing: Dispatch<SetStateAction<BaseMenu | null>>;
   valueBeforeEditing: BaseMenu | null;
   removeItem: () => void;
-  path: MenuItemsPath;
-  appendItem: () => void;
+  path: MenuItemPath;
+  appendEmptyItem: () => void;
   menuItemStats: MenuItemStats;
   sortable: ReturnType<typeof useSortsableExtended>;
 }> = ({
@@ -150,11 +150,11 @@ const MenuItemDisplay: FC<{
   setIsEditing,
   removeItem,
   path,
-  appendItem,
+  appendEmptyItem,
   menuItemStats,
   sortable,
 }) => {
-  const form = useFormContext<MenuItems>();
+  const form = useFormContext<MenuItemT>();
   const value = form.getValues(path);
   const { depth, isItemFirst, hasChildren, isItemLast } = menuItemStats;
   const { attributes, listeners, setNodeRef, transform, style } = sortable;
@@ -209,7 +209,7 @@ const MenuItemDisplay: FC<{
         />
         <Button
           className="rounded-l-none border-l-transparent"
-          onClick={appendItem}
+          onClick={appendEmptyItem}
           variant="secondary"
         >
           Dodaj pozycję menu
@@ -220,7 +220,7 @@ const MenuItemDisplay: FC<{
 };
 
 export const MenuItem: FC<{
-  path: MenuItemsPath;
+  path: MenuItemPath;
   removeItem: UseFieldArrayRemove;
   preventEditingState: boolean;
 }> = ({ path, removeItem, preventEditingState }) => {
@@ -231,9 +231,9 @@ export const MenuItem: FC<{
     null,
   );
 
-  const form = useFormContext<MenuItems>();
+  const form = useFormContext<MenuItemT>();
   const arrayField = useMenuItemsArray(form, path);
-  const { fields, appendItem, remove: removeChild, swap } = arrayField;
+  const { fields, appendEmptyItem, remove: removeChild, swap } = arrayField;
 
   const menuItemStats = useMenuItemStats(path);
   const { depth } = menuItemStats;
@@ -253,7 +253,7 @@ export const MenuItem: FC<{
         />
       ) : (
         <MenuItemDisplay
-          appendItem={appendItem}
+          appendEmptyItem={appendEmptyItem}
           menuItemStats={menuItemStats}
           path={path}
           removeItem={removeItem}
@@ -269,7 +269,7 @@ export const MenuItem: FC<{
           {fields.map((field, index) => (
             <div key={field.id} style={sortable.style}>
               <MenuItem
-                path={`${path}.items.${index}` as MenuItemsPath}
+                path={`${path}.items.${index}` as MenuItemPath}
                 removeItem={() => removeChild(index)}
                 preventEditingState={preventEditingState}
               />
