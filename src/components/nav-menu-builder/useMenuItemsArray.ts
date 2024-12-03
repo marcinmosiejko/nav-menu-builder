@@ -1,12 +1,10 @@
 import { useFieldArray, UseFormReturn } from "react-hook-form";
-import { MenuItem as MenuItemT, MenuItemPath } from "./schema";
+import {
+  MenuItem as MenuItemT,
+  MenuItemPath,
+  getEmptyMenuItem,
+} from "./schema";
 import { useCallback } from "react";
-
-const emptyMenuItem = {
-  name: "",
-  link: "",
-  items: [],
-};
 
 export const useMenuItemsArray = (
   form: UseFormReturn<MenuItemT, unknown, undefined>,
@@ -18,7 +16,7 @@ export const useMenuItemsArray = (
   });
 
   const appendEmptyItem = useCallback(() => {
-    append(emptyMenuItem);
+    append(getEmptyMenuItem());
   }, [append]);
 
   return { fields, appendEmptyItem, append, ...rest };
