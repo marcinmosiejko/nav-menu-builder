@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import BinIcon from "@/components/icons/bin-icon";
 import { useMenuItemsArray } from "./useItemsArray";
 import { MenuItemBaseFields } from "./menu-items-base-fields";
+import { ButtonWithConfirm } from "@/components/button-with-confirm";
 
 const baseMenuItemSchema = z.object({
   name: z
@@ -133,7 +134,7 @@ const MenuItem = ({
 }: {
   form: UseFormReturn<MenuItem, unknown, undefined>;
   path: string;
-  removeItem?: () => void;
+  removeItem: () => void;
 }) => {
   const [isEditing, setIsEditing] = useState(true);
   const [valueBeforeEditing, setValueBeforeEditing] =
@@ -186,7 +187,7 @@ const MenuItem = ({
                     items: form.getValues(`${path}.items` as "items"),
                   });
                 } else {
-                  removeItem?.();
+                  removeItem();
                 }
                 setIsEditing(false);
               }}
@@ -201,14 +202,17 @@ const MenuItem = ({
               {valueBeforeEditing ? "Zapisz" : "Dodaj"}
             </Button>
           </div>
-
-          <Button
-            onClick={removeItem}
-            className="absolute right-10 top-6 fill-none hover:opacity-70"
-            variant="plain"
-          >
-            <BinIcon />
-          </Button>
+          <ButtonWithConfirm
+            TriggerBody={
+              <Button
+                className="absolute right-10 top-6 fill-none hover:opacity-70"
+                variant="plain"
+              >
+                <BinIcon />
+              </Button>
+            }
+            removeItem={removeItem}
+          />
         </div>
       ) : (
         <div
@@ -230,27 +234,31 @@ const MenuItem = ({
               </span>
             </div>
           </div>
-          <div className="[&>button]:focus-visible:relative">
+          <div>
             <Button
-              className="rounded-r-none border-r-transparent"
+              className="rounded-r-none border-r-transparent focus-visible:relative"
               onClick={() => {
-                setIsEditing(true);
                 setValueBeforeEditing({
                   name: value?.name || "",
                   link: value?.link || "",
                 });
+                setIsEditing(true);
               }}
               variant="secondary"
             >
               Edytuj
             </Button>
-            <Button
-              className="rounded-none"
-              onClick={removeItem}
-              variant="secondary"
-            >
-              Usuń
-            </Button>
+            <ButtonWithConfirm
+              TriggerBody={
+                <Button
+                  className="rounded-none focus-visible:relative"
+                  variant="secondary"
+                >
+                  Usuń
+                </Button>
+              }
+              removeItem={removeItem}
+            />
             <Button
               className="rounded-l-none border-l-transparent"
               onClick={appendItem}
