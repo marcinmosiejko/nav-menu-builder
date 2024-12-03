@@ -9,25 +9,25 @@ import { useEffect, useState } from "react";
 import { useMenuItemsArray } from "./useMenuItemsArray";
 import { MenuItemBaseFields } from "./menu-item-base-fields";
 import { MenuItem } from "./menu-item";
-import { SubmitButtons } from "./submit-buttons";
-import { type MenuItems, type MenuItemsPath, menuItemsSchema } from "./schema";
+import { FormSubmitButtons } from "./form-submit-buttons";
+import {
+  type MenuItem as MenuItemT,
+  type MenuItemPath,
+  menuItemsSchema,
+} from "./schema";
 import { toast } from "sonner";
 import {
   DnDSortableContextWrap,
   useSortsableExtended,
 } from "./dnd-sorting-context-wrap";
+import { getStateFromLocalStorage } from "@/lib/utils";
 
 export const STORAGE_KEY = "menuItems";
 
-export const getStateFromLocalStorage = <T,>(storageKey: string) => {
-  const savedData = localStorage.getItem(storageKey);
-  return savedData ? (JSON.parse(savedData) as T) : undefined;
-};
-
-const topMenuItemPath = "" as MenuItemsPath;
+const topMenuItemPath = "" as MenuItemPath;
 
 export const NavMenuBuilder = () => {
-  const form = useForm<MenuItems>({
+  const form = useForm<MenuItemT>({
     mode: "onChange",
     reValidateMode: "onChange",
     shouldFocusError: false,
@@ -43,9 +43,9 @@ export const NavMenuBuilder = () => {
 
   const { reset, getValues } = form;
   const arrayField = useMenuItemsArray(form, topMenuItemPath);
-  const { fields, appendItem, remove, swap } = arrayField;
+  const { fields, appendEmptyItem, remove, swap } = arrayField;
 
-  const onSubmit = (values: MenuItems) => {
+  const onSubmit = (values: MenuItemT) => {
     setPreventEditingState(true);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
     reset(values);
@@ -58,7 +58,7 @@ export const NavMenuBuilder = () => {
   const hasItems = !!getValues().items.length;
 
   useEffect(() => {
-    const data = getStateFromLocalStorage<MenuItems>(STORAGE_KEY);
+    const data = getStateFromLocalStorage<MenuItemT>(STORAGE_KEY);
     if (data) reset(data);
     setIsLoading(false);
     setTimeout(() => {
@@ -106,7 +106,7 @@ export const NavMenuBuilder = () => {
                       <div key={field.id} style={sortable.style}>
                         <MenuItem
                           key={field.id}
-                          path={`items.${index}` as MenuItemsPath}
+                          path={`items.${index}` as MenuItemPath}
                           removeItem={() => remove(index)}
                           preventEditingState={preventEditingState}
                         />{" "}
@@ -117,7 +117,7 @@ export const NavMenuBuilder = () => {
                     <Button
                       className="m-6"
                       variant="secondary"
-                      onClick={appendItem}
+                      onClick={appendEmptyItem}
                     >
                       Dodaj pozycję menu
                     </Button>
@@ -133,7 +133,7 @@ export const NavMenuBuilder = () => {
                       W tym menu nie ma jeszcze żadnych linków
                     </span>
                   </div>
-                  <Button variant="primary" onClick={appendItem}>
+                  <Button variant="primary" onClick={appendEmptyItem}>
                     <PlusIcon />
                     Dodaj pozycję menu
                   </Button>
@@ -141,7 +141,7 @@ export const NavMenuBuilder = () => {
               )}
             </div>
           </div>
-          <SubmitButtons />
+          <FormSubmitButtons storageKey={STORAGE_KEY} />
         </form>
       </Form>
     </div>
