@@ -3,47 +3,49 @@
 import { Button } from "@/components/button";
 import ArrowLeftIcon from "@/components/icons/arrow-left-icon";
 import PlusIcon from "@/components/icons/plus-icon";
-import { useForm, UseFormReturn } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/form";
-import { useState } from "react";
-import ArrowsCrossIcon from "@/components/icons/arrows-cross-icon";
-import { cn } from "@/lib/utils";
-import BinIcon from "@/components/icons/bin-icon";
-import { useMenuItemsArray } from "./useItemsArray";
-import { MenuItemBaseFields } from "./menu-items-base-fields";
-import { ButtonWithConfirm } from "@/components/button-with-confirm";
+import { useMenuItemsArray } from "./useMenuItemsArray";
+import { MenuItemBaseFields } from "./MenuItemBaseFields";
+import { MenuItem } from "./MenuItem";
 
-const baseMenuItemSchema = z.object({
+export const baseMenuItemSchema = z.object({
   name: z
     .string({ required_error: "Nazwa jest wymagana." })
     .min(1, { message: "Nazwa nie może być pusta." }),
   link: z.string().optional(),
 });
-type BaseMenuType = z.infer<typeof baseMenuItemSchema>;
-export type MenuItem = z.infer<typeof baseMenuItemSchema> & {
+const menuItemsSchema: z.ZodType<MenuItem> = baseMenuItemSchema.extend({
+  items: z.lazy(() => menuItemsSchema.array()),
+});
+export type BaseMenu = z.infer<typeof baseMenuItemSchema>;
+export type MenuItem = BaseMenu & {
   items: MenuItem[];
 };
 const menuSchema: z.ZodType<MenuItem> = baseMenuItemSchema.extend({
   items: z.lazy(() => menuSchema.array()),
 });
-export type MenuItems = z.infer<typeof menuSchema>;
+export type MenuItems = z.infer<typeof menuItemsSchema>;
 
 export default function Home() {
-  const form = useForm<z.infer<typeof menuSchema>>({
+  const form = useForm<MenuItems>({
     mode: "onChange",
-    resolver: zodResolver(menuSchema),
+    reValidateMode: "onChange",
+    shouldFocusError: false,
+    resolver: zodResolver(menuItemsSchema),
     defaultValues: {
       name: "",
       link: "",
       items: [],
     },
   });
-
+  const { getValues } = form;
   const { fields, appendItem, removeItem } = useMenuItemsArray(form);
-  const hasItems = !!form.getValues().items.length;
-  const onSubmit = (values: z.infer<typeof menuSchema>) => {};
+
+  const onSubmit = (values: z.infer<typeof menuItemsSchema>) => {};
+  const hasItems = !!getValues().items.length;
 
   return (
     <div className="flex flex-col gap-6">
@@ -53,6 +55,7 @@ export default function Home() {
           Wróć do listy nawigacji
         </Button>
       </nav>
+
       <h1 className="text-2xl font-bold">Dodaj nawigację</h1>
       <Form {...form}>
         <form
@@ -78,8 +81,7 @@ export default function Home() {
                   {fields.map((field, index) => (
                     <div className="w-full" key={field.id}>
                       <MenuItem
-                        form={form}
-                        path={`items.${index}`}
+                        path={`items.${index}` as "items.0"}
                         removeItem={removeItem(index)}
                       />
                     </div>
@@ -126,161 +128,3 @@ export default function Home() {
     </div>
   );
 }
-
-const MenuItem = ({
-  form,
-  path,
-  removeItem,
-}: {
-  form: UseFormReturn<MenuItem, unknown, undefined>;
-  path: string;
-  removeItem: () => void;
-}) => {
-  const [isEditing, setIsEditing] = useState(true);
-  const [valueBeforeEditing, setValueBeforeEditing] =
-    useState<BaseMenuType | null>(null);
-  const {
-    fields,
-    appendItem,
-    removeItem: removeChildItem,
-  } = useMenuItemsArray(form, path);
-
-  const value = form.getValues(path as `items.0`);
-  const parentItemsCount =
-    form.getValues(
-      (path.split(".").slice(0, -2).join(".") || undefined) as `items.0`,
-    ).items?.length || 1;
-  const depth = path.split(".").length / 2;
-  const itemIndex = Number(path.split(".").at(-1)!);
-  const isItemFirst = itemIndex === 0;
-  const isItemLast = itemIndex === parentItemsCount - 1;
-  const hasChildren = !!form.getValues((path || undefined) as `items.0`).items
-    .length;
-  const isErrored = !!form.getFieldState(path as "items.0").error;
-  return (
-    <div className={cn("flex flex-col rounded-none", depth > 1 && "ml-16")}>
-      {isEditing ? (
-        <div
-          className={cn(
-            "bg-background border-border relative flex flex-col gap-4 rounded-md py-4 pl-6 pr-24",
-            depth > 1 && "m-6 ml-0 border",
-            depth === 1 && !isItemFirst && "m-6 border",
-          )}
-        >
-          <div className="flex flex-col gap-2">
-            <MenuItemBaseFields
-              nameFieldProps={{
-                label: "Nazwa",
-                placeholder: "np. Promocje",
-                name: `${path}.name` as `name`,
-              }}
-              linkFieldProps={{ name: `${path}.link` as `link` }}
-            />
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="secondary"
-              onClick={() => {
-                if (valueBeforeEditing) {
-                  form.setValue(path as "items.0", {
-                    ...valueBeforeEditing,
-                    items: form.getValues(`${path}.items` as "items"),
-                  });
-                } else {
-                  removeItem();
-                }
-                setIsEditing(false);
-              }}
-            >
-              Anuluj
-            </Button>
-            <Button
-              onClick={() => setIsEditing(false)}
-              variant="secondary-color"
-              disabled={isErrored}
-            >
-              {valueBeforeEditing ? "Zapisz" : "Dodaj"}
-            </Button>
-          </div>
-          <ButtonWithConfirm
-            TriggerBody={
-              <Button
-                className="absolute right-10 top-6 fill-none hover:opacity-70"
-                variant="plain"
-              >
-                <BinIcon />
-              </Button>
-            }
-            removeItem={removeItem}
-          />
-        </div>
-      ) : (
-        <div
-          className={cn(
-            "bg-background border-border-secondary m-[-1px] flex items-center justify-between border py-4 pl-8 pr-6",
-            depth === 1 && isItemFirst && "mt-0 rounded-t-md border-t-0",
-            depth === 1 && "mx-0 border-x-0",
-            depth > 1 && "mx-0 border-r-0",
-            depth > 1 && (hasChildren || isItemLast) && "rounded-bl-md",
-            hasChildren && "mb-0 border-b",
-          )}
-        >
-          <div className="flex items-center gap-4">
-            <ArrowsCrossIcon />
-            <div className="flex flex-col gap-2 text-sm">
-              <span className="font-semibold">{value?.name || ""}</span>
-              <span className="text-foreground-tertiary">
-                {value?.link || ""}
-              </span>
-            </div>
-          </div>
-          <div>
-            <Button
-              className="rounded-r-none border-r-transparent focus-visible:relative"
-              onClick={() => {
-                setValueBeforeEditing({
-                  name: value?.name || "",
-                  link: value?.link || "",
-                });
-                setIsEditing(true);
-              }}
-              variant="secondary"
-            >
-              Edytuj
-            </Button>
-            <ButtonWithConfirm
-              TriggerBody={
-                <Button
-                  className="rounded-none focus-visible:relative"
-                  variant="secondary"
-                >
-                  Usuń
-                </Button>
-              }
-              removeItem={removeItem}
-            />
-            <Button
-              className="rounded-l-none border-l-transparent"
-              onClick={appendItem}
-              variant="secondary"
-            >
-              Dodaj pozycję menu
-            </Button>
-          </div>
-        </div>
-      )}
-
-      <div className="bg-background-secondary">
-        {fields.map((field, index) => (
-          <div key={field.id}>
-            <MenuItem
-              path={`${path}.items.${index}`}
-              form={form}
-              removeItem={removeChildItem(index)}
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
