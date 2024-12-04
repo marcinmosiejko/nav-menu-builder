@@ -9,7 +9,6 @@ export const SubmitButtons = () => {
   const formValues = useFormState({
     control,
   });
-  const isValid = !Object.keys(formValues.errors).length;
 
   return (
     <div className="flex justify-end gap-2">
@@ -30,11 +29,7 @@ export const SubmitButtons = () => {
         description="Anulowanie oznacza usunięcie wszelkich zmian dokonanych od ostatniego zapisania."
       />
 
-      <Button
-        type="submit"
-        variant="primary"
-        disabled={!formValues.isDirty || !isValid}
-      >
+      <Button type="submit" variant="primary" disabled={!formValues.isDirty}>
         Zapisz
       </Button>
     </div>
