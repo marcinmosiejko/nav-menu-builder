@@ -10,6 +10,15 @@ import { Form } from "@/components/form";
 import { useMenuItemsArray } from "./useMenuItemsArray";
 import { MenuItemBaseFields } from "./MenuItemBaseFields";
 import { MenuItem } from "./MenuItem";
+import { useEffect } from "react";
+import { SubmitButtons } from "./submit-buttons";
+
+const STORAGE_KEY = "menuItems";
+
+export const getMenuStateFromLocalStorage = () => {
+  const savedData = localStorage.getItem(STORAGE_KEY);
+  return savedData ? (JSON.parse(savedData) as MenuItems) : undefined;
+};
 
 export const baseMenuItemSchema = z.object({
   name: z
@@ -41,11 +50,20 @@ export default function Home() {
       items: [],
     },
   });
-  const { getValues } = form;
+  const { reset, getValues } = form;
   const { fields, appendItem, removeItem } = useMenuItemsArray(form);
 
-  const onSubmit = (values: z.infer<typeof menuItemsSchema>) => {};
+  const onSubmit = (values: MenuItems) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
+    reset(values);
+  };
+
   const hasItems = !!getValues().items.length;
+
+  useEffect(() => {
+    const data = getMenuStateFromLocalStorage();
+    if (data) reset(data);
+  }, [reset]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -114,15 +132,7 @@ export default function Home() {
               )}
             </div>
           </div>
-
-          <div className="flex justify-end gap-2">
-            <Button type="reset" variant="secondary">
-              Anuluj
-            </Button>
-            <Button type="submit" variant="primary">
-              Zapisz
-            </Button>
-          </div>
+          <SubmitButtons />
         </form>
       </Form>
     </div>

@@ -27,6 +27,9 @@ const AddOrSaveButton: FC<{
   );
 };
 
+const confirmRemoveDescription =
+  "Usunięcie tego elementu oznacza usunięcie także wszystkich jego pod-elementów.";
+
 export const MenuItem = ({
   path,
   removeItem,
@@ -116,7 +119,8 @@ export const MenuItem = ({
                 <BinIcon />
               </Button>
             }
-            removeItem={removeItem}
+            onConfirm={removeItem}
+            description={confirmRemoveDescription}
           />
         </div>
       ) : (
@@ -162,7 +166,8 @@ export const MenuItem = ({
                   Usuń
                 </Button>
               }
-              removeItem={removeItem}
+              onConfirm={removeItem}
+              description={confirmRemoveDescription}
             />
             <Button
               className="rounded-l-none border-l-transparent"
