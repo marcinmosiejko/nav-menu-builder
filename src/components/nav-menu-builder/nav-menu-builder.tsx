@@ -8,7 +8,7 @@ import { Form } from "@/components/form";
 import { FC, useCallback, useEffect, useState } from "react";
 import { useMenuItemsArray } from "./useMenuItemsArray";
 import { MenuItemBaseFields } from "./menu-item/menu-item-base-fields";
-import { MenuItem } from "./menu-item/menu-item";
+import { buttonTextAndPadding, MenuItem } from "./menu-item/menu-item";
 import { FormSubmitButtons } from "../form-submit-buttons";
 import {
   type MenuItem as MenuItemT,
@@ -23,7 +23,7 @@ import {
   SortableContextWrap,
   useSortableExtended,
 } from "./dnd";
-import { getStateFromLocalStorage, runAtEndOfCallStack } from "@/lib/utils";
+import { cn, getStateFromLocalStorage, runAtEndOfCallStack } from "@/lib/utils";
 import { DragOverlay } from "@dnd-kit/core";
 import { createPortal } from "react-dom";
 import { useHandleArrayFieldById } from "./context";
@@ -37,7 +37,7 @@ const topMenuItemPath = "" as MenuItemPath;
 
 const TopMenuItemFields = () => {
   return (
-    <div className="bg-background border-border flex flex-col gap-4 rounded-md border p-6">
+    <div className="bg-background border-border flex flex-col gap-2 rounded-md border p-6 md:gap-4">
       <h2 className="font-semibold">Nazwa</h2>
       <MenuItemBaseFields
         nameFieldProps={{
@@ -73,7 +73,7 @@ const DnDMode: FC<{
   onChange: (v: boolean) => void;
 }> = ({ value, onChange }) => {
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex h-6 w-full items-center justify-between space-x-2 md:h-auto md:w-auto md:justify-normal">
       <Label htmlFor="mode">
         {value
           ? "Pełny D&D (zbugowany)"
@@ -164,7 +164,7 @@ export const NavMenuBuilder = () => {
       allowHandleDragOver={isFullDnD}
     >
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">Dodaj nawigację</h1>
+        <h1 className="text-xl font-bold md:text-2xl">Dodaj nawigację</h1>
         <Form {...form}>
           <form
             className="flex flex-col gap-6"
@@ -172,7 +172,7 @@ export const NavMenuBuilder = () => {
           >
             <TopMenuItemFields />
             <div className="bg-background border-border flex flex-col gap-6 rounded-md border p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col items-start gap-2 md:flex-row md:justify-between md:gap-0">
                 <h2 className="font-semibold">Pozycje menu</h2>
                 <DnDMode value={isFullDnD} onChange={onDnDModeChange} />
               </div>
@@ -195,7 +195,7 @@ export const NavMenuBuilder = () => {
                     </SortableContextWrap>
                     <div className="bg-background-tertiary border-border-secondary rounded-md rounded-t-none border-t">
                       <Button
-                        className="m-6"
+                        className={cn(buttonTextAndPadding, "m-4 md:m-6")}
                         variant="secondary"
                         onClick={appendEmptyItem}
                       >

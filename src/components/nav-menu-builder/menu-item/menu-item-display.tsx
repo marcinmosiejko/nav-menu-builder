@@ -10,7 +10,7 @@ import { ButtonWithConfirm } from "@/components/button-with-confirm";
 import ArrowsCrossIcon from "@/components/icons/arrows-cross-icon";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useSortableExtended } from "../dnd";
-import { MenuItemStats } from "./menu-item";
+import { buttonTextAndPadding, MenuItemStats } from "./menu-item";
 import { confirmRemoveDescription } from "./menu-item-editor";
 import { DEPTH_LIMIT } from "../nav-menu-builder";
 
@@ -45,7 +45,7 @@ export const MenuItemDisplay: FC<{
   return (
     <div
       className={cn(
-        "bg-background border-border-secondary m-[-1px] flex items-center justify-between border py-4 pl-8 pr-6",
+        "bg-background border-border-secondary m-[-1px] flex flex-col gap-2 border py-4 pl-4 pr-2 md:flex-row md:items-center md:justify-between md:gap-0 md:pl-8 md:pr-6",
         depth === 1 && isItemFirst && "mt-0 rounded-t-md border-t-0",
         depth === 1 && "mx-0 border-x-0",
         depth > 1 && "mx-0 border-r-0",
@@ -56,7 +56,12 @@ export const MenuItemDisplay: FC<{
       )}
     >
       <div className="flex items-center gap-4">
-        <span ref={setActivatorNodeRef} {...listeners} {...attributes}>
+        <span
+          className="focus-visible:ring-primary ring-offset-background rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          ref={setActivatorNodeRef}
+          {...listeners}
+          {...attributes}
+        >
           <ArrowsCrossIcon className="duration-250 transition-all hover:opacity-70" />
         </span>
         <div className="flex flex-col gap-2 text-sm">
@@ -64,9 +69,12 @@ export const MenuItemDisplay: FC<{
           <span className="text-foreground-tertiary">{item?.link}</span>
         </div>
       </div>
-      <div>
+      <div className="md:text-auto w-full text-right md:w-auto">
         <Button
-          className="rounded-r-none border-r-transparent focus-visible:relative"
+          className={cn(
+            buttonTextAndPadding,
+            "rounded-r-none border-r-transparent focus-visible:relative",
+          )}
           onClick={() => {
             setValueBeforeEditing({
               id: item.id,
@@ -83,6 +91,7 @@ export const MenuItemDisplay: FC<{
           TriggerBody={
             <Button
               className={cn(
+                buttonTextAndPadding,
                 "rounded-none focus-visible:relative",
                 !showAddItemButton && "rounded-r-md",
               )}
@@ -96,11 +105,15 @@ export const MenuItemDisplay: FC<{
         />
         {showAddItemButton && (
           <Button
-            className="rounded-l-none border-l-transparent"
+            className={cn(
+              buttonTextAndPadding,
+              "rounded-l-none border-l-transparent",
+            )}
             onClick={appendEmptyItem}
             variant="secondary"
           >
-            Dodaj pozycję menu
+            <span>Dodaj</span>
+            <span className="hidden md:inline">pozycję menu</span>
           </Button>
         )}
       </div>

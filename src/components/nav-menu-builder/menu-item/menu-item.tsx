@@ -45,6 +45,8 @@ export const getMenuItemStats = (
   };
 };
 
+export const buttonTextAndPadding = "px-2 text-xs md:px-[14px] md:text-sm";
+
 export const MenuItem: FC<{
   parentId: string;
   path: MenuItemPath;
@@ -82,7 +84,12 @@ export const MenuItem: FC<{
 
   return (
     <div style={sortable.style} ref={sortable.setNodeRef}>
-      <div className={cn("flex flex-col rounded-none", depth > 1 && "ml-16")}>
+      <div
+        className={cn(
+          "flex flex-col rounded-none",
+          depth > 1 && "ml-4 md:ml-16",
+        )}
+      >
         {isEditing ? (
           <MenuItemEditor
             menuItemStats={menuItemStats}

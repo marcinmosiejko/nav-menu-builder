@@ -22,7 +22,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} bg-background-tertiary flex min-h-screen flex-col antialiased`}
       >
-        <main className="mx-auto w-full max-w-[1440px] flex-grow px-12 py-6">
+        <main className="mx-auto w-full max-w-[1440px] flex-grow px-6 py-6 md:px-12">
           {children}
         </main>
         <Toaster position="top-center" />
