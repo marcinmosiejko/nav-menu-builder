@@ -25,7 +25,7 @@ export default function RootLayout({
         <main className="mx-auto w-full max-w-[1440px] flex-grow px-12 py-6">
           {children}
         </main>
-        <Toaster position="top-center" richColors />
+        <Toaster position="top-center" />
       </body>
     </html>
   );
