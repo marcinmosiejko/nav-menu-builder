@@ -97,13 +97,14 @@ export const NavMenuBuilder = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
     reset(values);
     setAllowEditingDeferred(true);
-    toast.success("Your changes have been successfully saved!");
+    toast.success("Twoje zmiany zostały zapisane!");
   };
   const onReset = () => {
     setAllowEditing(false);
     const data = getStateFromLocalStorage<MenuItemT>(STORAGE_KEY);
     reset(data);
     setAllowEditingDeferred(true);
+    toast.success("Twoje zmiany zostały cofnięte!");
   };
 
   useEffect(() => {
