@@ -9,7 +9,7 @@ import { FC, useCallback, useEffect, useState } from "react";
 import { useMenuItemsArray } from "./useMenuItemsArray";
 import { MenuItemBaseFields } from "./menu-item/menu-item-base-fields";
 import { MenuItem } from "./menu-item/menu-item";
-import { FormSubmitButtons } from "./form-submit-buttons";
+import { FormSubmitButtons } from "../form-submit-buttons";
 import {
   type MenuItem as MenuItemT,
   type MenuItemPath,
@@ -99,6 +99,12 @@ export const NavMenuBuilder = () => {
     setAllowEditingDeferred(true);
     toast.success("Your changes have been successfully saved!");
   };
+  const onReset = () => {
+    setAllowEditing(false);
+    const data = getStateFromLocalStorage<MenuItemT>(STORAGE_KEY);
+    reset(data);
+    setAllowEditingDeferred(true);
+  };
 
   useEffect(() => {
     const data = getStateFromLocalStorage<MenuItemT>(STORAGE_KEY);
@@ -166,7 +172,7 @@ export const NavMenuBuilder = () => {
                 )}
               </div>
             </div>
-            <FormSubmitButtons storageKey={STORAGE_KEY} />
+            <FormSubmitButtons onReset={onReset} />
           </form>
           {createPortal(
             <DragOverlay>
