@@ -19,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} bg-background-secondary flex min-h-screen flex-col antialiased`}
+        className={`${inter.variable} bg-background-tertiary flex min-h-screen flex-col antialiased`}
       >
         <main className="mx-auto w-full max-w-[1440px] flex-grow px-12 py-6">
           {children}
