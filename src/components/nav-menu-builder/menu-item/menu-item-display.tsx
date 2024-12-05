@@ -12,6 +12,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 import { useSortableExtended } from "../dnd";
 import { MenuItemStats } from "./menu-item";
 import { confirmRemoveDescription } from "./menu-item-editor";
+import { DEPTH_LIMIT } from "../nav-menu-builder";
 
 export const MenuItemDisplay: FC<{
   setIsEditing: Dispatch<SetStateAction<boolean>>;
@@ -39,6 +40,7 @@ export const MenuItemDisplay: FC<{
   const item = useWatch({ name: path, control });
   const { depth, isItemFirst, hasChildren, isItemLast } = menuItemStats;
   const { attributes, listeners, setActivatorNodeRef } = sortable;
+  const showAddItemButton = depth < DEPTH_LIMIT;
 
   return (
     <div
@@ -80,7 +82,10 @@ export const MenuItemDisplay: FC<{
         <ButtonWithConfirm
           TriggerBody={
             <Button
-              className="rounded-none focus-visible:relative"
+              className={cn(
+                "rounded-none focus-visible:relative",
+                !showAddItemButton && "rounded-r-md",
+              )}
               variant="secondary"
             >
               Usuń
@@ -89,13 +94,15 @@ export const MenuItemDisplay: FC<{
           onConfirm={removeItem}
           description={confirmRemoveDescription}
         />
-        <Button
-          className="rounded-l-none border-l-transparent"
-          onClick={appendEmptyItem}
-          variant="secondary"
-        >
-          Dodaj pozycję menu
-        </Button>
+        {showAddItemButton && (
+          <Button
+            className="rounded-l-none border-l-transparent"
+            onClick={appendEmptyItem}
+            variant="secondary"
+          >
+            Dodaj pozycję menu
+          </Button>
+        )}
       </div>
     </div>
   );

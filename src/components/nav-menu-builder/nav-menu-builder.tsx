@@ -31,6 +31,7 @@ import { Switch } from "../switch";
 import { Label } from "../label";
 
 export const STORAGE_KEY = "menuItems";
+export const DEPTH_LIMIT = 7;
 
 const topMenuItemPath = "" as MenuItemPath;
 
