@@ -42,6 +42,15 @@ export const MenuItemDisplay: FC<{
   const { attributes, listeners, setActivatorNodeRef } = sortable;
   const showAddItemButton = depth < DEPTH_LIMIT;
 
+  const onEdit = () => {
+    setValueBeforeEditing({
+      id: item.id,
+      name: item.name,
+      link: item.link,
+    });
+    setIsEditing(true);
+  };
+
   return (
     <div
       className={cn(
@@ -75,14 +84,7 @@ export const MenuItemDisplay: FC<{
             buttonTextAndPadding,
             "rounded-r-none border-r-transparent focus-visible:relative",
           )}
-          onClick={() => {
-            setValueBeforeEditing({
-              id: item.id,
-              name: item.name,
-              link: item.link,
-            });
-            setIsEditing(true);
-          }}
+          onClick={onEdit}
           variant="secondary"
         >
           Edytuj
