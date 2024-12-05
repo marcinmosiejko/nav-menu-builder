@@ -5,7 +5,7 @@ import { NavMenuBuilder } from "@/components/nav-menu-builder/nav-menu-builder";
 
 export default function NavMenuBuilderPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-2 md:space-y-6">
       <nav>
         <Button variant="neutral" className="px-0">
           <ArrowLeftIcon />
