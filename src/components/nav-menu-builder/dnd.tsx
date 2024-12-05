@@ -49,12 +49,14 @@ export const DndContextWrap = <A extends Active>({
   afterOnDragEnd,
   setActiveItem,
   form,
+  allowHandleDragOver,
 }: {
   children: ReactNode;
   form: UseFormReturn<MenuItem, unknown, undefined>;
   beforeOnDragStart: () => void;
   afterOnDragEnd: () => void;
   setActiveItem: (item: A | null) => void;
+  allowHandleDragOver: boolean;
 }) => {
   const { arrayFieldById } = useNavMenuBuilderContext();
   const sensors = useSensors(
@@ -187,7 +189,7 @@ export const DndContextWrap = <A extends Active>({
       onDragEnd={handleDragEnd}
       onDragStart={handleDragStart}
       onDragCancel={handleDragCancel}
-      onDragOver={handleDragOver}
+      onDragOver={allowHandleDragOver ? handleDragOver : undefined}
     >
       {children}
     </DndContext>

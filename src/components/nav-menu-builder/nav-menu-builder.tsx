@@ -27,6 +27,8 @@ import { getStateFromLocalStorage, runAtEndOfCallStack } from "@/lib/utils";
 import { DragOverlay } from "@dnd-kit/core";
 import { createPortal } from "react-dom";
 import { useHandleArrayFieldById } from "./context";
+import { Switch } from "../switch";
+import { Label } from "../label";
 
 export const STORAGE_KEY = "menuItems";
 
@@ -65,7 +67,24 @@ const MenuEmptyState: FC<{ onAddItem: () => void }> = ({ onAddItem }) => {
   );
 };
 
+const DnDMode: FC<{
+  value: boolean;
+  onChange: (v: boolean) => void;
+}> = ({ value, onChange }) => {
+  return (
+    <div className="flex items-center space-x-2">
+      <Label htmlFor="mode">
+        {value
+          ? "Pełny D&D (zbugowany)"
+          : "Okrojony D&D (jeden poziom, działa w większości przypadków)"}
+      </Label>
+      <Switch id="mode" checked={value} onCheckedChange={onChange} />
+    </div>
+  );
+};
+
 export const NavMenuBuilder = () => {
+  const [isFullDnD, setIsFullDnD] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activeItem, setActiveItem] = useState<DnDActiveWithContext | null>(
     null,
@@ -80,7 +99,7 @@ export const NavMenuBuilder = () => {
   const form = useForm<MenuItemT>({
     mode: "onChange",
     reValidateMode: "onChange",
-    shouldFocusError: false,
+    shouldFocusError: true,
     resolver: zodResolver(menuItemsSchema),
     defaultValues: getEmptyMenuItem(),
   });
@@ -121,6 +140,17 @@ export const NavMenuBuilder = () => {
   const beforeOnDragStart = () => setAllowEditing(false);
   const afterOnDragEnd = () => setAllowEditingDeferred(true);
 
+  const onDnDModeChange = (v: boolean) => {
+    setIsFullDnD(v);
+    setAllowEditing(false);
+    const data = getStateFromLocalStorage<MenuItemT>(STORAGE_KEY);
+    reset(data);
+    setAllowEditingDeferred(true);
+    toast.success(
+      "Pomyślnie zmieniłeś tryb D&D (twoje ostatnie zmiany zostały cofnięte)",
+    );
+  };
+
   // No skeleton for this as data loads too quickly for it to make sense. But it prevents from rendering empty form for a split second before the data comes in.
   if (isLoading) return null;
 
@@ -130,6 +160,7 @@ export const NavMenuBuilder = () => {
       beforeOnDragStart={beforeOnDragStart}
       afterOnDragEnd={afterOnDragEnd}
       setActiveItem={setActiveItem}
+      allowHandleDragOver={isFullDnD}
     >
       <div className="space-y-6">
         <h1 className="text-2xl font-bold">Dodaj nawigację</h1>
@@ -139,8 +170,11 @@ export const NavMenuBuilder = () => {
             onSubmit={form.handleSubmit(onSubmit)}
           >
             <TopMenuItemFields />
-            <div className="bg-background border-border flex flex-col gap-4 rounded-md border p-6">
-              <h2 className="font-semibold">Pozycje menu</h2>
+            <div className="bg-background border-border flex flex-col gap-6 rounded-md border p-6">
+              <div className="flex items-center justify-between">
+                <h2 className="font-semibold">Pozycje menu</h2>
+                <DnDMode value={isFullDnD} onChange={onDnDModeChange} />
+              </div>
               <div className="bg-background-secondary border-border flex flex-col items-center justify-center gap-4 rounded-md border">
                 {hasChildren ? (
                   <div className="w-full">
