@@ -12,7 +12,7 @@ import {
 
 export const ButtonWithConfirm: React.FC<{
   TriggerBody: React.ReactNode;
-  onConfirm: () => void;
+  onConfirm?: () => void;
   description: string;
 }> = ({ TriggerBody, onConfirm, description }) => {
   return (
@@ -30,7 +30,7 @@ export const ButtonWithConfirm: React.FC<{
             </Button>
           </DialogClose>
           <DialogClose asChild>
-            <Button variant="primary" onClick={() => onConfirm()}>
+            <Button variant="primary" onClick={() => onConfirm?.()}>
               Potwierdź
             </Button>
           </DialogClose>

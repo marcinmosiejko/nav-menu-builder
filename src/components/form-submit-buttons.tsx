@@ -1,15 +1,10 @@
 import { Button } from "@/components/button";
 import { ButtonWithConfirm } from "@/components/button-with-confirm";
-import { useFormContext } from "react-hook-form";
-import { MenuItem as MenuItemT } from "./schema";
 import { FC } from "react";
-import { getStateFromLocalStorage } from "@/lib/utils";
 
-export const FormSubmitButtons: FC<{ storageKey: string }> = ({
-  storageKey,
-}) => {
-  const { reset } = useFormContext();
-
+export const FormSubmitButtons: FC<{
+  onReset: () => void;
+}> = ({ onReset }) => {
   return (
     <div className="flex justify-end gap-2">
       <ButtonWithConfirm
@@ -18,10 +13,7 @@ export const FormSubmitButtons: FC<{ storageKey: string }> = ({
             Anuluj
           </Button>
         }
-        onConfirm={() => {
-          const data = getStateFromLocalStorage<MenuItemT>(storageKey);
-          reset(data);
-        }}
+        onConfirm={onReset}
         description="Anulowanie oznacza usunięcie wszelkich zmian dokonanych od ostatniego zapisania."
       />
 
