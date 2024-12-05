@@ -54,6 +54,18 @@ export const MenuItemEditor: FC<{
   const form = useFormContext<MenuItemT>();
   const { depth, isItemFirst, hasSiblings, hasChildren } = menuItemStats;
 
+  const onCancel = () => {
+    if (valueBeforeEditing) {
+      form.setValue(path, {
+        ...valueBeforeEditing,
+        items: form.getValues(`${path}.items` as "items"),
+      });
+    } else {
+      removeItem();
+    }
+    setIsEditing(false);
+  };
+
   return (
     <div
       className={cn(
@@ -83,17 +95,7 @@ export const MenuItemEditor: FC<{
         <Button
           className={buttonTextAndPadding}
           variant="secondary"
-          onClick={() => {
-            if (valueBeforeEditing) {
-              form.setValue(path, {
-                ...valueBeforeEditing,
-                items: form.getValues(`${path}.items` as "items"),
-              });
-            } else {
-              removeItem();
-            }
-            setIsEditing(false);
-          }}
+          onClick={onCancel}
         >
           Anuluj
         </Button>
