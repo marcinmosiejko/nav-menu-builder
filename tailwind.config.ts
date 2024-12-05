@@ -9,8 +9,37 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background: {
+          DEFAULT: "hsl(var(--background))",
+          secondary: "hsl(var(--background-secondary))",
+          tertiary: "hsl(var(--background-tertiary))",
+        },
+        foreground: {
+          DEFAULT: "hsl(var(--foreground))",
+          secondary: "hsl(var(--foreground-secondary))",
+          tertiary: "hsl(var(--foreground-tertiary))",
+          placeholder: "hsl(var(--foreground-placeholder))",
+        },
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        border: {
+          DEFAULT: "hsl(var(--border))",
+        },
+
+        button: {
+          primary: {
+            DEFAULT: "hsl(var(--primary))",
+            foreground: "hsl(var(--primary-foreground))",
+            border: "hsl(var(--button-primary))",
+          },
+          "secondary-color": {
+            DEFAULT: "hsl(var(--background))",
+            foreground: "hsl(var(--button-secondary-color-foreground))",
+            border: "hsl(var(--button-secondary-color-border))",
+          },
+        },
       },
     },
   },
