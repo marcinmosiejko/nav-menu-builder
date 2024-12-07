@@ -27,8 +27,9 @@ export const NavMenuBuilder2 = () => {
   }, []);
 
   const menu = menuStore.menu;
+  const path = [0];
 
-  const { handleAddItem } = useItemActions(menu.id, [0]);
+  const { handleAddItem } = useItemActions(menu.id, path);
 
   // No skeleton for this as data loads too quickly for it to make sense. But it prevents from rendering menu for a split second before the data comes in.
   if (isLoading) return null;
@@ -70,7 +71,7 @@ export const NavMenuBuilder2 = () => {
                         key={item.id}
                         activeId={activeItem?.id}
                         item={item}
-                        path={[0, index]}
+                        path={[...path, index]}
                         parentId={menu.id}
                         parentItems={menu.items}
                       />
