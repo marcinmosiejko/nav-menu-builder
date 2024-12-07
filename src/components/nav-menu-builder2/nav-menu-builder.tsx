@@ -78,6 +78,20 @@ export const NavMenuBuilder2 = () => {
   // No skeleton for this as data loads too quickly for it to make sense. But it prevents from rendering menu for a split second before the data comes in.
   if (isLoading) return null;
 
+  const onAddItem = (...args: Parameters<typeof menuStore.appendItem>) => {
+    menuStore.appendItem(...args);
+    const item = args[1];
+    addEditingItemId(item.id);
+  };
+  const onEditItem = (id: string) => {
+    addEditingItemId(id);
+  };
+  const onSaveItem = (...args: Parameters<typeof menuStore.updateItem>) => {
+    const item = args[1];
+    removeEditingItemId(item.id);
+    menuStore.updateItem(...args);
+  };
+
   const onSave = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(menuStore.menu));
     toast.success("Twoje zmiany zostały zapisane!");
