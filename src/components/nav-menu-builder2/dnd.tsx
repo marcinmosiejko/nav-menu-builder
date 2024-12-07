@@ -41,10 +41,8 @@ export type DnDItemWithContext<T> = T & {
 export type DnDActiveWithContext = DnDItemWithContext<Active>;
 export type DnDOverWithContext = DnDItemWithContext<Over>;
 
-export const DndContextWrap = <A extends Active>({
+export const DndContextWrap = ({
   children,
-  beforeOnDragStart,
-  afterOnDragEnd,
   setActiveItem,
   setItems,
   items,
@@ -53,7 +51,7 @@ export const DndContextWrap = <A extends Active>({
   children: ReactNode;
   beforeOnDragStart: () => void;
   afterOnDragEnd: () => void;
-  setActiveItem: (item?: A) => void;
+  setActiveItem: (item?: DnDActiveWithContext) => void;
   setItems: SetItems;
   items: MenuItem[];
   moveItem: MoveItem;
@@ -68,7 +66,7 @@ export const DndContextWrap = <A extends Active>({
 
   const handleDragStart = ({ active }: DragStartEvent) => {
     // beforeOnDragStart();
-    setActiveItem(active as unknown as A);
+    setActiveItem(active as unknown as DnDActiveWithContext);
   };
 
   const handleDragOver = (event: DragOverEvent) => {

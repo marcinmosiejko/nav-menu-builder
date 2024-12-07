@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
+import { generateRandomId } from "./utils";
 
 const initialItems = [
   {
@@ -79,21 +80,31 @@ const initialItems = [
   },
 ];
 
+const emptyMenuItem = {
+  name: "",
+  link: "",
+  items: [],
+};
+export const getNewMenuItem = () => ({
+  ...emptyMenuItem,
+  id: generateRandomId(12),
+});
+
 export type MenuItem = {
   id: string;
   name: string;
   link?: string;
   items: MenuItem[];
 };
+export type Menu = MenuItem;
 export type MenuItemPath = number[];
 
 const getItemAndContext = (
-  items: MenuItem[],
   path: MenuItemPath,
+  menu: Menu,
 ): { item: MenuItem; parentItems: MenuItem[]; itemIndex: number } => {
   const [parentPath, itemIndex] = [path.slice(0, -1), path.at(-1)!];
-  let current = items;
-
+  let current = [menu];
   for (const index of parentPath) {
     current = current[index].items;
   }
@@ -107,13 +118,13 @@ export type MoveItem = (
   newIndex: MenuItemPath[number],
 ) => void;
 
-export const useMenuItemsStore = create<
+export const useMenuStore = create<
   { menu: MenuItem } & {
     setItems: (newItems: MenuItem[]) => void;
     setMenu: (menu: MenuItem) => void;
+    appendItem: (path: MenuItemPath, newItem: MenuItem) => void;
     updateItem: (path: MenuItemPath, newItem: MenuItem) => void;
     removeItem: (path: MenuItemPath) => void;
-    appendItem: (path: MenuItemPath, newItem: MenuItem) => void;
     moveItem: MoveItem;
   }
 >()(
@@ -134,38 +145,29 @@ export const useMenuItemsStore = create<
         state.menu.items = newItems;
       }),
 
+    appendItem: (path, newItem) =>
+      set((state) => {
+        const { item } = getItemAndContext(path, state.menu);
+        item.items.push(newItem);
+      }),
+
     updateItem: (path, newItem) =>
       set((state) => {
-        const { parentItems, itemIndex } = getItemAndContext(
-          state.menu.items,
-          path,
-        );
+        const { parentItems, itemIndex } = getItemAndContext(path, state.menu);
         parentItems[itemIndex] = newItem;
       }),
 
     removeItem: (path) =>
       set((state) => {
-        const { parentItems, itemIndex } = getItemAndContext(
-          state.menu.items,
-          path,
-        );
+        const { parentItems, itemIndex } = getItemAndContext(path, state.menu);
         parentItems.splice(itemIndex, 1);
-      }),
-
-    appendItem: (path, newItem) =>
-      set((state) => {
-        const { parentItems, itemIndex } = getItemAndContext(
-          state.menu.items,
-          path,
-        );
-        parentItems[itemIndex].items.push(newItem);
       }),
 
     moveItem: (path, newIndex) =>
       set((state) => {
         const { parentItems, item, itemIndex } = getItemAndContext(
-          state.menu.items,
           path,
+          state.menu,
         );
         parentItems.splice(itemIndex, 1);
         parentItems.splice(newIndex, 0, item);

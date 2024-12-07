@@ -1,66 +1,34 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  ReactNode,
-  useState,
-  useCallback,
-  useEffect,
-} from "react";
-import { ArrayPath, FieldValues, UseFieldArrayReturn } from "react-hook-form";
+import React, { createContext, useContext, ReactNode, useState } from "react";
+import { DnDActiveWithContext } from "./dnd";
+import { getNewMenuItem, MenuItem, MenuItemPath, useMenuStore } from "./store";
 
-type ArrayField<
-  T extends FieldValues,
-  AP extends ArrayPath<T>,
-> = UseFieldArrayReturn<T, AP, "id">;
-type ArrayFieldById<T extends FieldValues, AP extends ArrayPath<T>> = Record<
-  string,
-  ArrayField<T, AP> | undefined
->;
-
-type NavMenuBuilderContextT<T extends FieldValues, AP extends ArrayPath<T>> = {
-  arrayFieldById: ArrayFieldById<T, AP>;
-  onAddArrayField: (arrayField: ArrayField<T, AP>, id: string) => void;
-  onRemoveArrayField: (id: string) => void;
+type NavMenuBuilderContextT = {
   addEditingItemId: (id: string) => void;
   removeEditingItemId: (id: string) => void;
   editingItemIds: string[];
   isEditingAllowed: boolean;
   handleSetIsEditingAllowed: (isAllowed: boolean) => void;
+  activeItem?: DnDActiveWithContext;
+  handleSetActiveItem: (activeItem: DnDActiveWithContext | undefined) => void;
 };
 
 const NavMenuBuilderContext = createContext<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  NavMenuBuilderContextT<any, any> | undefined
+  NavMenuBuilderContextT | undefined
 >(undefined);
 
 type NavMenuBuilderProviderProps = {
   children: ReactNode;
 };
 
-const NavMenuBuilderProvider = <
-  T extends FieldValues,
-  AP extends ArrayPath<T>,
->({
-  children,
-}: NavMenuBuilderProviderProps) => {
-  const [arrayFieldById, setArrayFieldById] = useState<ArrayFieldById<T, AP>>(
-    {},
-  );
+const NavMenuBuilderProvider = ({ children }: NavMenuBuilderProviderProps) => {
   const [isEditingAllowed, setIsEditingAllowed] = useState(false);
   const [editingItemIds, setEditingItemIds] = useState<string[]>([]);
-
-  const onAddArrayField = useCallback(
-    (arrayField: ArrayField<T, AP>, id: string) =>
-      setArrayFieldById((prev) => ({ ...prev, [id]: arrayField })),
-    [],
-  );
-  const onRemoveArrayField = useCallback(
-    (path: string) =>
-      setArrayFieldById((prev) => ({ ...prev, [path]: undefined })),
-    [],
-  );
+  const [activeItem, setActiveItem] = useState<
+    DnDActiveWithContext | undefined
+  >(undefined);
 
   const addEditingItemId = (id: string) => {
     setEditingItemIds((prev) => [...new Set([...prev, id])]);
@@ -72,17 +40,19 @@ const NavMenuBuilderProvider = <
   const handleSetIsEditingAllowed = (isAllowed: boolean) =>
     setIsEditingAllowed(isAllowed);
 
+  const handleSetActiveItem = (activeItem: DnDActiveWithContext | undefined) =>
+    setActiveItem(activeItem);
+
   return (
     <NavMenuBuilderContext.Provider
       value={{
-        arrayFieldById,
-        onAddArrayField,
-        onRemoveArrayField,
         addEditingItemId,
         removeEditingItemId,
         editingItemIds,
         isEditingAllowed,
         handleSetIsEditingAllowed,
+        activeItem,
+        handleSetActiveItem,
       }}
     >
       {children}
@@ -90,41 +60,42 @@ const NavMenuBuilderProvider = <
   );
 };
 
-const useNavMenuBuilderContext = <
-  T extends FieldValues,
-  AP extends ArrayPath<T>,
->(): NavMenuBuilderContextT<T, AP> => {
+const useNavMenuBuilderContext = (): NavMenuBuilderContextT => {
   const ctx = useContext(NavMenuBuilderContext);
   if (!ctx) {
     throw new Error(
       "useNavMenuBuilderContext must be used within a NavMenuBuilderProvider",
     );
   }
-  return ctx as NavMenuBuilderContextT<T, AP>;
+  return ctx as NavMenuBuilderContextT;
 };
 
 export { NavMenuBuilderProvider, useNavMenuBuilderContext };
 
-export const useHandleArrayFieldById = <
-  T extends FieldValues,
-  AP extends ArrayPath<T>,
->(
-  arrayField: ArrayField<T, AP>,
-  id: string,
-) => {
-  const { onAddArrayField, onRemoveArrayField } = useNavMenuBuilderContext<
-    T,
-    AP
-  >();
-  useEffect(() => {
-    onAddArrayField(arrayField, id);
-
-    return () => onRemoveArrayField(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
-};
-
 export const useIsEditing = (id: string) => {
   const { editingItemIds, isEditingAllowed } = useNavMenuBuilderContext();
   return editingItemIds.includes(id) && isEditingAllowed;
+};
+
+export const useItemActions = (id: string, path: MenuItemPath) => {
+  const menuStore = useMenuStore();
+  const { addEditingItemId, removeEditingItemId } = useNavMenuBuilderContext();
+
+  const handleAddItem = () => {
+    const newItem = getNewMenuItem();
+    addEditingItemId(newItem.id);
+    menuStore.appendItem(path, newItem);
+  };
+  const handleEditItem = () => {
+    addEditingItemId(id);
+  };
+  const handleSaveItem = (newItem: MenuItem) => {
+    removeEditingItemId(newItem.id);
+    menuStore.updateItem(path, newItem);
+  };
+  const handleRemoveItem = () => {
+    menuStore.removeItem(path);
+  };
+
+  return { handleAddItem, handleEditItem, handleSaveItem, handleRemoveItem };
 };

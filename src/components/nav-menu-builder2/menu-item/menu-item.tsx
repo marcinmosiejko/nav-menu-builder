@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { SortableContextWrap, useSortableExtended } from "../dnd";
 import { MenuItemDisplay } from "./menu-item-display";
 import { MenuItem as MenuItemT } from "../store";
-import { useIsEditing } from "../context";
+import { useIsEditing, useItemActions } from "../context";
 
 export type MenuItemStats = ReturnType<typeof getMenuItemStats>;
 export const getMenuItemStats = ({
@@ -20,7 +20,7 @@ export const getMenuItemStats = ({
   const parentPath = path.slice(0, -1);
 
   const parentItemsCount = parentItems?.length || 1;
-  const depth = path.length;
+  const depth = path.length - 1;
   const itemIndex = path.at(-1);
   const isItemFirst = itemIndex === 0;
   const isItemLast = itemIndex === parentItemsCount - 1;
@@ -50,6 +50,8 @@ export const MenuItem: FC<{
   parentItems: MenuItemT[];
 }> = ({ path, activeId, item, isOverlay, parentItems, parentId }) => {
   const itemId = item.id;
+  const { handleAddItem, handleEditItem, handleRemoveItem, handleSaveItem } =
+    useItemActions(itemId, path);
   const isEditing = useIsEditing(itemId);
   const menuItemStats = getMenuItemStats({ path, parentItems, item, parentId });
   const { depth } = menuItemStats;
@@ -80,8 +82,9 @@ export const MenuItem: FC<{
           menuItemStats={menuItemStats}
           path={path}
           item={item}
-          removeItem={() => {}}
-          setIsEditing={() => {}}
+          onRemoveItem={handleRemoveItem}
+          onAddItem={handleAddItem}
+          onEdititem={handleEditItem}
           sortable={sortable}
           isBeingDragged={isDragged}
           isOverlay={isOverlay}
