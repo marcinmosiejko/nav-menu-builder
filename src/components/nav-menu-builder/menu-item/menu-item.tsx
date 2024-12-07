@@ -80,58 +80,54 @@ export const MenuItem: FC<{
     id: itemId,
     transition: null,
     data: { ...menuItemStats, parentId },
+    disabled: activeId === item?.id,
   });
 
   return (
-    <div style={sortable.style} ref={sortable.setNodeRef}>
-      <div
-        className={cn(
-          "flex flex-col rounded-none",
-          depth > 1 && "ml-4 md:ml-16",
-        )}
-      >
-        {isEditing ? (
-          <MenuItemEditor
-            menuItemStats={menuItemStats}
-            path={path}
-            removeItem={removeItem}
-            setIsEditing={setIsEditing}
-            valueBeforeEditing={valueBeforeEditing}
-          />
-        ) : (
-          <MenuItemDisplay
-            appendEmptyItem={appendEmptyItem}
-            menuItemStats={menuItemStats}
-            path={path}
-            removeItem={removeItem}
-            setIsEditing={setIsEditing}
-            setValueBeforeEditing={setValueBeforeEditing}
-            valueBeforeEditing={valueBeforeEditing}
-            sortable={sortable}
-            isBeingDragged={isBeingDragged}
-            isOverlay={isOverlay}
-          />
-        )}
+    <div
+      className={cn("flex flex-col rounded-none", depth > 1 && "ml-4 md:ml-16")}
+    >
+      {isEditing ? (
+        <MenuItemEditor
+          menuItemStats={menuItemStats}
+          path={path}
+          removeItem={removeItem}
+          setIsEditing={setIsEditing}
+          valueBeforeEditing={valueBeforeEditing}
+        />
+      ) : (
+        <MenuItemDisplay
+          appendEmptyItem={appendEmptyItem}
+          menuItemStats={menuItemStats}
+          path={path}
+          removeItem={removeItem}
+          setIsEditing={setIsEditing}
+          setValueBeforeEditing={setValueBeforeEditing}
+          valueBeforeEditing={valueBeforeEditing}
+          sortable={sortable}
+          isBeingDragged={isBeingDragged}
+          isOverlay={isOverlay}
+        />
+      )}
 
-        {!isBeingDragged && (
-          <div className="bg-background-secondary">
-            <SortableContextWrap items={item?.items || []}>
-              {fields.map((field, index) => (
-                <div key={field.id}>
-                  <MenuItem
-                    parentId={itemId}
-                    path={`${path}.items.${index}` as MenuItemPath}
-                    removeItem={() => removeChild(index)}
-                    allowEditing={allowEditing}
-                    activeId={activeId}
-                    isOverlay={isOverlay}
-                  />
-                </div>
-              ))}
-            </SortableContextWrap>
-          </div>
-        )}
-      </div>
+      {!isBeingDragged && (
+        <div className="bg-background-secondary">
+          <SortableContextWrap items={item?.items || []}>
+            {fields.map((field, index) => (
+              <div key={field.id}>
+                <MenuItem
+                  parentId={itemId}
+                  path={`${path}.items.${index}` as MenuItemPath}
+                  removeItem={() => removeChild(index)}
+                  allowEditing={allowEditing}
+                  activeId={activeId}
+                  isOverlay={isOverlay}
+                />
+              </div>
+            ))}
+          </SortableContextWrap>
+        </div>
+      )}
     </div>
   );
 };

@@ -82,10 +82,6 @@ export const NavMenuBuilder = () => {
     setAllowEditingDeferred(true);
   }, [reset, setAllowEditingDeferred]);
 
-  const sortable = useSortableExtended({
-    id: topMenuItemPath,
-  });
-
   const beforeOnDragStart = () => setAllowEditing(false);
   const afterOnDragEnd = () => setAllowEditingDeferred(true);
 
@@ -129,7 +125,7 @@ export const NavMenuBuilder = () => {
                   <div className="w-full">
                     <SortableContextWrap items={item.items}>
                       {fields.map((field, index) => (
-                        <div key={field.id} style={sortable.style}>
+                        <div key={field.id}>
                           <MenuItem
                             parentId={item.id}
                             key={field.id}

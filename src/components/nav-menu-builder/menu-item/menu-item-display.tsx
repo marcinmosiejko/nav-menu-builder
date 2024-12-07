@@ -39,7 +39,8 @@ export const MenuItemDisplay: FC<{
   const { control } = useFormContext<MenuItemT>();
   const item = useWatch({ name: path, control });
   const { depth, isItemFirst, hasChildren, isItemLast } = menuItemStats;
-  const { attributes, listeners, setActivatorNodeRef } = sortable;
+  const { attributes, listeners, setActivatorNodeRef, setNodeRef, style } =
+    sortable;
   const showAddItemButton = depth < DEPTH_LIMIT;
 
   const onEdit = () => {
@@ -63,6 +64,8 @@ export const MenuItemDisplay: FC<{
         isBeingDragged && !isOverlay && "bg-primary/10 border border-r-0",
         isOverlay && "ring-primary/10 ml-0 opacity-70 ring",
       )}
+      style={style}
+      ref={setNodeRef}
     >
       <div className="flex items-center gap-4">
         <span
