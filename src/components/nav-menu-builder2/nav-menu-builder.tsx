@@ -13,9 +13,14 @@ import { cn, getStateFromLocalStorage, runAtEndOfCallStack } from "@/lib/utils";
 import { DragOverlay } from "@dnd-kit/core";
 import { createPortal } from "react-dom";
 import { MenuEmptyState } from "./components";
-import { MenuItem as MenuItemT, useMenuItemsStore } from "./store";
+import {
+  getNewMenuItem,
+  MenuItemPath,
+  MenuItem as MenuItemT,
+  useMenuStore,
+} from "./store";
 import { MenuSubmitButtons } from "./menu-save-buttons";
-import { useNavMenuBuilderContext } from "./context";
+import { useItemActions, useNavMenuBuilderContext } from "./context";
 
 export const STORAGE_KEY = "menuItems";
 export const DEPTH_LIMIT = 7;
@@ -54,17 +59,19 @@ const OverlayPortal: FC<{ activeItem?: DnDActiveWithContext }> = ({
 };
 
 export const NavMenuBuilder2 = () => {
-  const menuStore = useMenuItemsStore();
+  const menuStore = useMenuStore();
   const [isLoading, setIsLoading] = useState(true);
-  const [activeItem, setActiveItem] = useState<
-    DnDActiveWithContext | undefined
-  >(undefined);
-  const { addEditingItemId, removeEditingItemId, editingItemIds } =
-    useNavMenuBuilderContext();
+
+  const {
+    activeItem,
+    handleSetActiveItem,
+    addEditingItemId,
+    removeEditingItemId,
+    handleSetIsEditingAllowed,
+  } = useNavMenuBuilderContext();
   // form by default shows items in editing mode which we want to prevent on first page load, reload and rerenders caused by form reset
-  const [editingAllowed, setEditingAllowed] = useState(false);
   const setAllowEditingDeferred = useCallback(
-    (allow: boolean) => runAtEndOfCallStack(setEditingAllowed)(allow),
+    (allow: boolean) => runAtEndOfCallStack(handleSetIsEditingAllowed)(allow),
     [],
   );
 
@@ -75,22 +82,11 @@ export const NavMenuBuilder2 = () => {
     // setAllowEditingDeferred(true);
   }, []);
 
+  const menu = menuStore.menu;
+  const { handleAddItem } = useItemActions(menu.id, [0]);
+
   // No skeleton for this as data loads too quickly for it to make sense. But it prevents from rendering menu for a split second before the data comes in.
   if (isLoading) return null;
-
-  const onAddItem = (...args: Parameters<typeof menuStore.appendItem>) => {
-    menuStore.appendItem(...args);
-    const item = args[1];
-    addEditingItemId(item.id);
-  };
-  const onEditItem = (id: string) => {
-    addEditingItemId(id);
-  };
-  const onSaveItem = (...args: Parameters<typeof menuStore.updateItem>) => {
-    const item = args[1];
-    removeEditingItemId(item.id);
-    menuStore.updateItem(...args);
-  };
 
   const onSave = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(menuStore.menu));
@@ -102,14 +98,14 @@ export const NavMenuBuilder2 = () => {
     if (data) menuStore.setMenu(data);
     toast.success("Twoje zmiany zostały cofnięte!");
   };
-  const menu = menuStore.menu;
+
   const hasChildren = !!menu.items.length;
 
   return (
-    <DndContextWrap<DnDActiveWithContext>
+    <DndContextWrap
       beforeOnDragStart={() => {}}
       afterOnDragEnd={() => {}}
-      setActiveItem={setActiveItem}
+      setActiveItem={handleSetActiveItem}
       setItems={menuStore.setItems}
       moveItem={menuStore.moveItem}
       items={menuStore.menu.items}
@@ -131,7 +127,7 @@ export const NavMenuBuilder2 = () => {
                         key={item.id}
                         activeId={activeItem?.id}
                         item={item}
-                        path={[index]}
+                        path={[0, index]}
                         parentId={menu.id}
                         parentItems={menu.items}
                       />
@@ -141,14 +137,14 @@ export const NavMenuBuilder2 = () => {
                     <Button
                       className={cn(buttonTextAndPadding, "m-4 md:m-6")}
                       variant="secondary"
-                      onClick={() => {}}
+                      onClick={handleAddItem}
                     >
                       Dodaj pozycję menu
                     </Button>
                   </div>
                 </div>
               ) : (
-                <MenuEmptyState onAddItem={() => {}} />
+                <MenuEmptyState onAddItem={handleAddItem} />
               )}
             </div>
           </div>

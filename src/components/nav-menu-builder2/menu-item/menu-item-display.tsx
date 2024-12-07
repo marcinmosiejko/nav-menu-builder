@@ -1,4 +1,4 @@
-import { Dispatch, FC, SetStateAction } from "react";
+import { FC } from "react";
 import { MenuItem as MenuItemT } from "@/components/nav-menu-builder/schema";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/button";
@@ -10,33 +10,28 @@ import { confirmRemoveDescription } from "./menu-item-editor";
 import { DEPTH_LIMIT } from "../nav-menu-builder";
 
 export const MenuItemDisplay: FC<{
-  setIsEditing: Dispatch<SetStateAction<boolean>>;
-  removeItem: () => void;
-  path: number[];
-  appendEmptyItem: () => void;
   menuItemStats: MenuItemStats;
   sortable: ReturnType<typeof useSortableExtended>;
   isBeingDragged: boolean;
   isOverlay?: boolean;
   item: MenuItemT;
+  onRemoveItem: () => void;
+  onAddItem: () => void;
+  onEdititem: () => void;
 }> = ({
-  setIsEditing,
-  removeItem,
-  appendEmptyItem,
   menuItemStats,
   sortable,
   isBeingDragged,
   isOverlay,
   item,
+  onRemoveItem,
+  onAddItem,
+  onEdititem,
 }) => {
   const { depth, isItemFirst, hasChildren, isItemLast } = menuItemStats;
   const { attributes, listeners, setActivatorNodeRef, setNodeRef, style } =
     sortable;
   const showAddItemButton = depth < DEPTH_LIMIT;
-
-  const onEdit = () => {
-    setIsEditing(true);
-  };
 
   return (
     <div
@@ -73,7 +68,7 @@ export const MenuItemDisplay: FC<{
             buttonTextAndPadding,
             "rounded-r-none border-r-transparent focus-visible:relative",
           )}
-          onClick={onEdit}
+          onClick={onEdititem}
           variant="secondary"
         >
           Edytuj
@@ -91,7 +86,7 @@ export const MenuItemDisplay: FC<{
               Usuń
             </Button>
           }
-          onConfirm={removeItem}
+          onConfirm={onRemoveItem}
           description={confirmRemoveDescription}
         />
         {showAddItemButton && (
@@ -100,7 +95,7 @@ export const MenuItemDisplay: FC<{
               buttonTextAndPadding,
               "rounded-l-none border-l-transparent",
             )}
-            onClick={appendEmptyItem}
+            onClick={onAddItem}
             variant="secondary"
           >
             <span>Dodaj</span>
