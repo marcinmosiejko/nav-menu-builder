@@ -1,13 +1,12 @@
 "use client";
 
 import { Button } from "@/components/button";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { buttonTextAndPadding, MenuItem } from "./menu-item/menu-item";
-import { toast } from "sonner";
 import { DndContextWrap, DragOverlayPortal, SortableContextWrap } from "./dnd";
 import { cn, getStateFromLocalStorage } from "@/lib/utils";
 import { MenuEmptyState, TopMenuItemEditor } from "./components";
-import { MenuItem as MenuItemT, useMenuStore } from "./store";
+import { Menu, MenuItem as MenuItemT, useMenuStore } from "./store";
 import { MenuSaveButtons } from "./menu-save-buttons";
 import { useItemActions, useNavMenuBuilderContext } from "./context";
 
@@ -17,33 +16,30 @@ export const DEPTH_LIMIT = 7;
 export const NavMenuBuilder2 = () => {
   const menuStore = useMenuStore();
   const [isLoading, setIsLoading] = useState(true);
-  const { activeItem, handleSetActiveItem, formByItemId } =
-    useNavMenuBuilderContext();
+  const { activeItem, handleSetActiveItem } = useNavMenuBuilderContext();
+  const [lastSavedData, setLastSavedData] = useState<Menu | undefined>();
 
   useEffect(() => {
-    const data = getStateFromLocalStorage<MenuItemT>(STORAGE_KEY);
-    if (data) menuStore.setMenu(data);
+    if (lastSavedData) return;
+    const lastSaved = getStateFromLocalStorage<Menu>(STORAGE_KEY);
+    if (lastSaved) {
+      setLastSavedData(lastSaved);
+      menuStore.setMenu(lastSaved);
+    }
     setIsLoading(false);
-  }, []);
+  }, [lastSavedData, menuStore]);
 
   const menu = menuStore.menu;
   const path = [0];
 
   const { handleAddItem } = useItemActions(menu.id, path);
 
-  // No skeleton for this as data loads too quickly for it to make sense. But it prevents from rendering menu for a split second before the data comes in.
+  const handleLastSavedDataChange = useCallback((data: Menu) => {
+    setLastSavedData(data);
+  }, []);
+
+  // No loading skeleton for this as data loads too quickly for it to make sense. But it prevents from rendering empty menu for a split second before the data comes in.
   if (isLoading) return null;
-
-  const onSave = () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(menuStore.menu));
-    toast.success("Twoje zmiany zostały zapisane!");
-  };
-
-  const onReset = () => {
-    const data = getStateFromLocalStorage<MenuItemT>(STORAGE_KEY);
-    if (data) menuStore.setMenu(data);
-    toast.success("Twoje zmiany zostały cofnięte!");
-  };
 
   const hasChildren = !!menu.items.length;
 
@@ -92,7 +88,10 @@ export const NavMenuBuilder2 = () => {
               )}
             </div>
           </div>
-          <MenuSaveButtons onSave={onSave} onReset={onReset} />
+          <MenuSaveButtons
+            lastSavedData={lastSavedData}
+            onLastSavedDataChange={handleLastSavedDataChange}
+          />
         </div>
         <DragOverlayPortal activeItem={activeItem} />
       </div>
