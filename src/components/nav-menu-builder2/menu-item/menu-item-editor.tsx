@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { BaseMenuItem, baseMenuItemSchema } from "../schema";
 import { MenuItem } from "../store";
 import { Form } from "@/components/form";
+import { useTrackActiveForms } from "../context";
 
 export const confirmRemoveDescription =
   "Usunięcie tego elementu oznacza usunięcie także wszystkich jego pod-elementów.";
@@ -45,6 +46,8 @@ export const MenuItemEditor: FC<{
     resolver: zodResolver(baseMenuItemSchema),
     defaultValues: { name: item.name, link: item.link },
   });
+
+  useTrackActiveForms(item.id, form);
 
   const onSubmit = (value: BaseMenuItem) => {
     onSaveItem({ ...item, ...value });

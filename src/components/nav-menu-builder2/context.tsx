@@ -9,6 +9,10 @@ import React, {
 } from "react";
 import { DnDActiveWithContext } from "./dnd";
 import { getNewMenuItem, MenuItem, MenuItemPath, useMenuStore } from "./store";
+import { useForm } from "react-hook-form";
+
+type Form = ReturnType<typeof useForm<any>>;
+type FormByItemId = Record<string, Form | undefined>;
 
 type NavMenuBuilderContextT = {
   addEditingItemId: (id: string) => void;
@@ -18,6 +22,9 @@ type NavMenuBuilderContextT = {
   handleSetIsEditingAllowed: (isAllowed: boolean) => void;
   activeItem?: DnDActiveWithContext;
   handleSetActiveItem: (activeItem: DnDActiveWithContext | undefined) => void;
+  handleAddFormByItemId: (id: string, form: Form) => void;
+  handleRemoveFormByItemId: (id: string) => void;
+  formByItemId: FormByItemId;
 };
 
 const NavMenuBuilderContext = createContext<NavMenuBuilderContextT | undefined>(
@@ -27,10 +34,12 @@ const NavMenuBuilderContext = createContext<NavMenuBuilderContextT | undefined>(
 type NavMenuBuilderProviderProps = {
   children: ReactNode;
 };
-
-const NavMenuBuilderProvider = ({ children }: NavMenuBuilderProviderProps) => {
+export const NavMenuBuilderProvider = ({
+  children,
+}: NavMenuBuilderProviderProps) => {
   const [isEditingAllowed, setIsEditingAllowed] = useState(true);
   const [editingItemIds, setEditingItemIds] = useState<string[]>([]);
+  const [formByItemId, setFormByItemId] = useState<FormByItemId>({});
   const [activeItem, setActiveItem] = useState<
     DnDActiveWithContext | undefined
   >(undefined);
@@ -52,6 +61,12 @@ const NavMenuBuilderProvider = ({ children }: NavMenuBuilderProviderProps) => {
   const handleSetActiveItem = (activeItem: DnDActiveWithContext | undefined) =>
     setActiveItem(activeItem);
 
+  const handleAddFormByItemId = (id: string, form: Form) =>
+    setFormByItemId((prev) => ({ ...prev, [id]: form }));
+
+  const handleRemoveFormByItemId = (id: string) =>
+    setFormByItemId((prev) => ({ ...prev, [id]: undefined }));
+
   return (
     <NavMenuBuilderContext.Provider
       value={{
@@ -62,6 +77,9 @@ const NavMenuBuilderProvider = ({ children }: NavMenuBuilderProviderProps) => {
         handleSetIsEditingAllowed,
         activeItem,
         handleSetActiveItem,
+        handleAddFormByItemId,
+        handleRemoveFormByItemId,
+        formByItemId,
       }}
     >
       {children}
@@ -69,7 +87,7 @@ const NavMenuBuilderProvider = ({ children }: NavMenuBuilderProviderProps) => {
   );
 };
 
-const useNavMenuBuilderContext = (): NavMenuBuilderContextT => {
+export const useNavMenuBuilderContext = (): NavMenuBuilderContextT => {
   const ctx = useContext(NavMenuBuilderContext);
   if (!ctx) {
     throw new Error(
@@ -78,8 +96,6 @@ const useNavMenuBuilderContext = (): NavMenuBuilderContextT => {
   }
   return ctx as NavMenuBuilderContextT;
 };
-
-export { NavMenuBuilderProvider, useNavMenuBuilderContext };
 
 export const useIsEditing = (id: string) => {
   const { editingItemIds, isEditingAllowed } = useNavMenuBuilderContext();
@@ -116,4 +132,15 @@ export const useItemActions = (id: string, path: MenuItemPath) => {
     handleRemoveItem,
     handleCancelEditItem,
   };
+};
+
+export const useTrackActiveForms = (id: string, form: Form) => {
+  const { handleAddFormByItemId, handleRemoveFormByItemId } =
+    useNavMenuBuilderContext();
+
+  useEffect(() => {
+    handleAddFormByItemId(id, form);
+
+    return () => handleRemoveFormByItemId(id);
+  }, [id]);
 };
