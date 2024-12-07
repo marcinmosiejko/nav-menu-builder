@@ -38,6 +38,9 @@ dependencies:
   immer:
     specifier: ^10.1.1
     version: 10.1.1
+  lodash.isequal:
+    specifier: ^4.5.0
+    version: 4.5.0
   lucide-react:
     specifier: ^0.462.0
     version: 0.462.0(react@19.0.0-rc-66855b96-20241106)
@@ -2579,6 +2582,10 @@ packages:
     dependencies:
       p-locate: 5.0.0
     dev: true
+
+  /lodash.isequal@4.5.0:
+    resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
+    dev: false
 
   /lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
