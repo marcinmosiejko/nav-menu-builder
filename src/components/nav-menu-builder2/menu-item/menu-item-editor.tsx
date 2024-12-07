@@ -1,53 +1,44 @@
-import { Dispatch, FC, SetStateAction } from "react";
+import { FC } from "react";
 import { cn } from "@/lib/utils";
 import { MenuItemBaseFields } from "./menu-item-base-fields";
 import { Button } from "@/components/button";
 import { ButtonWithConfirm } from "@/components/button-with-confirm";
 import BinIcon from "@/components/icons/bin-icon";
-import { useForm, useFormContext, useWatch } from "react-hook-form";
+import { useForm, useFormState } from "react-hook-form";
 import { buttonTextAndPadding, MenuItemStats } from "./menu-item";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { baseMenuItemSchema } from "../schema";
+import { BaseMenuItem, baseMenuItemSchema } from "../schema";
 import { MenuItem } from "../store";
 import { Form } from "@/components/form";
 
 export const confirmRemoveDescription =
   "Usunięcie tego elementu oznacza usunięcie także wszystkich jego pod-elementów.";
 
-const AddButton: FC<{
-  onClick: () => void;
-}> = ({ onClick }) => {
-  const { control } = useFormContext<MenuItem>();
-  const item = useWatch({
-    control,
-  });
-  const isValid = baseMenuItemSchema.safeParse(item).success;
+const SubmitButton = () => {
+  const formState = useFormState<MenuItem>();
+
   return (
     <Button
       className={buttonTextAndPadding}
-      onClick={onClick}
       variant="secondary-color"
-      disabled={!isValid}
+      disabled={!formState.isValid}
+      type="submit"
     >
-      {"Dodaj"}
+      Dodaj
     </Button>
   );
 };
 
 export const MenuItemEditor: FC<{
-  setIsEditing: Dispatch<SetStateAction<boolean>>;
-  removeItem: () => void;
-  menuItemStats: MenuItemStats;
   item: MenuItem;
-}> = ({ setIsEditing, removeItem, menuItemStats, item }) => {
+  menuItemStats: MenuItemStats;
+  onRemoveItem: () => void;
+  onSaveItem: (newItem: MenuItem) => void;
+  onCancelEditItem: () => void;
+}> = ({ menuItemStats, item, onRemoveItem, onCancelEditItem, onSaveItem }) => {
   const { depth, isItemFirst, hasSiblings, hasChildren } = menuItemStats;
 
-  const onCancel = () => {
-    removeItem();
-    setIsEditing(false);
-  };
-
-  const form = useForm<MenuItem>({
+  const form = useForm<BaseMenuItem>({
     mode: "onChange",
     reValidateMode: "onChange",
     shouldFocusError: true,
@@ -55,7 +46,9 @@ export const MenuItemEditor: FC<{
     defaultValues: { name: item.name, link: item.link },
   });
 
-  const onSubmit = () => {};
+  const onSubmit = (value: BaseMenuItem) => {
+    onSaveItem({ ...item, ...value });
+  };
 
   return (
     <Form {...form}>
@@ -87,11 +80,11 @@ export const MenuItemEditor: FC<{
             <Button
               className={buttonTextAndPadding}
               variant="secondary"
-              onClick={onCancel}
+              onClick={onCancelEditItem}
             >
               Anuluj
             </Button>
-            <AddButton onClick={() => setIsEditing(false)} />
+            <SubmitButton />
           </div>
           <ButtonWithConfirm
             TriggerBody={
@@ -102,7 +95,7 @@ export const MenuItemEditor: FC<{
                 <BinIcon />
               </Button>
             }
-            onConfirm={removeItem}
+            onConfirm={onRemoveItem}
             description={confirmRemoveDescription}
           />
         </div>
