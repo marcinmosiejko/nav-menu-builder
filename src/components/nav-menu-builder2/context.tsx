@@ -6,24 +6,38 @@ import React, {
   ReactNode,
   useState,
   useEffect,
+  useCallback,
 } from "react";
-import { DnDActiveWithContext } from "./dnd";
 import { getNewMenuItem, MenuItem, MenuItemPath, useMenuStore } from "./store";
-import { useForm } from "react-hook-form";
+import { UseFormReturn, UseFormStateReturn } from "react-hook-form";
+import { DnDActiveWithContext } from "./dnd";
+import { BaseMenuItem } from "./schema";
 
-type Form = ReturnType<typeof useForm<any>>;
-type FormByItemId = Record<string, Form | undefined>;
+type Form = UseFormReturn<BaseMenuItem>;
+type BasicFormState = Pick<
+  UseFormStateReturn<BaseMenuItem>,
+  "isDirty" | "isValid"
+>;
+type FormsByItemId = Record<string, Form>;
+type BasicFormsStateByItemId = Record<string, BasicFormState>;
 
 type NavMenuBuilderContextT = {
   addEditingItemId: (id: string) => void;
   removeEditingItemId: (id: string) => void;
+  // doesn't include top menu item form, as it's always in editing mode
   editingItemIds: string[];
   isDnDAllowed: boolean;
   activeItem?: DnDActiveWithContext;
   handleSetActiveItem: (activeItem: DnDActiveWithContext | undefined) => void;
+  formsByItemId: FormsByItemId;
   handleAddFormByItemId: (id: string, form: Form) => void;
   handleRemoveFormByItemId: (id: string) => void;
-  formByItemId: FormByItemId;
+  basicFormsStateByItemId: BasicFormsStateByItemId;
+  handleUpsertBasicFormsStateByItemId: (
+    id: string,
+    basicFormState: BasicFormState,
+  ) => void;
+  handleRemoveBasicFormsStateByItemId: (id: string) => void;
 };
 
 const NavMenuBuilderContext = createContext<NavMenuBuilderContextT | undefined>(
@@ -38,10 +52,12 @@ export const NavMenuBuilderProvider = ({
 }: NavMenuBuilderProviderProps) => {
   const [isDnDAllowed, setIsDnDAllowed] = useState(true);
   const [editingItemIds, setEditingItemIds] = useState<string[]>([]);
-  const [formByItemId, setFormByItemId] = useState<FormByItemId>({});
   const [activeItem, setActiveItem] = useState<
     DnDActiveWithContext | undefined
   >(undefined);
+  const [formsByItemId, setFormsByItemId] = useState<FormsByItemId>({});
+  const [basicFormsStateByItemId, setFormsStateByItemId] =
+    useState<BasicFormsStateByItemId>({});
 
   useEffect(() => {
     setIsDnDAllowed(!editingItemIds.length);
@@ -57,24 +73,69 @@ export const NavMenuBuilderProvider = ({
   const handleSetActiveItem = (activeItem: DnDActiveWithContext | undefined) =>
     setActiveItem(activeItem);
 
-  const handleAddFormByItemId = (id: string, form: Form) =>
-    setFormByItemId((prev) => ({ ...prev, [id]: form }));
+  const handleAddFormByItemId = useCallback(
+    (id: string, form: Form) =>
+      setFormsByItemId((prev) => ({ ...prev, [id]: form })),
+    [],
+  );
 
-  const handleRemoveFormByItemId = (id: string) =>
-    setFormByItemId((prev) => ({ ...prev, [id]: undefined }));
+  const handleRemoveFormByItemId = useCallback(
+    (id: string) =>
+      setFormsByItemId((prev) => {
+        const newFormById = { ...prev };
+        delete newFormById[id];
+        return newFormById;
+      }),
+    [],
+  );
+
+  const handleUpsertBasicFormsStateByItemId = useCallback(
+    (id: string, basicFormState: BasicFormState) => {
+      setFormsStateByItemId((prev) => {
+        const prevState = prev[id];
+        if (
+          !prevState ||
+          Object.entries(basicFormState).some(
+            ([k, v]) => prevState[k as keyof BasicFormState] !== v,
+          )
+        ) {
+          return { ...prev, [id]: basicFormState };
+        }
+        return prev;
+      });
+    },
+    [],
+  );
+
+  const handleRemoveBasicFormsStateByItemId = useCallback(
+    (id: string) =>
+      setFormsStateByItemId((prev) => {
+        const newFormsStateById = { ...prev };
+        delete newFormsStateById[id];
+        return newFormsStateById;
+      }),
+    [],
+  );
 
   return (
     <NavMenuBuilderContext.Provider
       value={{
-        addEditingItemId,
-        removeEditingItemId,
-        editingItemIds,
-        isDnDAllowed,
         activeItem,
         handleSetActiveItem,
+
+        isDnDAllowed,
+
+        editingItemIds,
+        addEditingItemId,
+        removeEditingItemId,
+
+        formsByItemId,
         handleAddFormByItemId,
         handleRemoveFormByItemId,
-        formByItemId,
+
+        basicFormsStateByItemId,
+        handleUpsertBasicFormsStateByItemId,
+        handleRemoveBasicFormsStateByItemId,
       }}
     >
       {children}
@@ -130,12 +191,33 @@ export const useItemActions = (id: string, path: MenuItemPath) => {
 };
 
 export const useTrackActiveForms = (id: string, form: Form) => {
-  const { handleAddFormByItemId, handleRemoveFormByItemId } =
-    useNavMenuBuilderContext();
+  const {
+    handleAddFormByItemId,
+    handleRemoveFormByItemId,
+    handleUpsertBasicFormsStateByItemId,
+    handleRemoveBasicFormsStateByItemId,
+  } = useNavMenuBuilderContext();
 
   useEffect(() => {
     handleAddFormByItemId(id, form);
 
-    return () => handleRemoveFormByItemId(id);
-  }, [id]);
+    return () => {
+      handleRemoveFormByItemId(id);
+      handleRemoveBasicFormsStateByItemId(id);
+    };
+  }, [
+    form,
+    handleAddFormByItemId,
+    handleRemoveBasicFormsStateByItemId,
+    handleRemoveFormByItemId,
+    id,
+  ]);
+
+  const {
+    formState: { isDirty, isValid },
+  } = form;
+
+  useEffect(() => {
+    handleUpsertBasicFormsStateByItemId(id, { isDirty, isValid });
+  }, [handleUpsertBasicFormsStateByItemId, id, isDirty, isValid]);
 };

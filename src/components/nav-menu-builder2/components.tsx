@@ -17,7 +17,6 @@ export const TopMenuItemEditor: FC<{ item: MenuItem }> = ({ item }) => {
     resolver: zodResolver(baseMenuItemSchema),
     defaultValues: { name: item.name, link: item.link },
   });
-
   useTrackActiveForms(item.id, form);
 
   return (
