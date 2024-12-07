@@ -111,6 +111,9 @@ export const useMenuItemsStore = create<
   { menu: MenuItem } & {
     setItems: (newItems: MenuItem[]) => void;
     setMenu: (menu: MenuItem) => void;
+    updateItem: (path: MenuItemPath, newItem: MenuItem) => void;
+    removeItem: (path: MenuItemPath) => void;
+    appendItem: (path: MenuItemPath, newItem: MenuItem) => void;
     moveItem: MoveItem;
   }
 >()(
@@ -130,6 +133,34 @@ export const useMenuItemsStore = create<
       set((state) => {
         state.menu.items = newItems;
       }),
+
+    updateItem: (path, newItem) =>
+      set((state) => {
+        const { parentItems, itemIndex } = getItemAndContext(
+          state.menu.items,
+          path,
+        );
+        parentItems[itemIndex] = newItem;
+      }),
+
+    removeItem: (path) =>
+      set((state) => {
+        const { parentItems, itemIndex } = getItemAndContext(
+          state.menu.items,
+          path,
+        );
+        parentItems.splice(itemIndex, 1);
+      }),
+
+    appendItem: (path, newItem) =>
+      set((state) => {
+        const { parentItems, itemIndex } = getItemAndContext(
+          state.menu.items,
+          path,
+        );
+        parentItems[itemIndex].items.push(newItem);
+      }),
+
     moveItem: (path, newIndex) =>
       set((state) => {
         const { parentItems, item, itemIndex } = getItemAndContext(
