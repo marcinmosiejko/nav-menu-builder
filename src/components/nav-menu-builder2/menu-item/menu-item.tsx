@@ -50,6 +50,7 @@ export const MenuItem: FC<{
   parentItems: MenuItemT[];
 }> = ({ path, activeId, item, isOverlay, parentItems, parentId }) => {
   const itemId = item.id;
+  const isEditing = useIsEditing(itemId);
   const menuItemStats = getMenuItemStats({ path, parentItems, item, parentId });
   const { depth } = menuItemStats;
   const isDragged = !!activeId && activeId === itemId;
@@ -61,7 +62,7 @@ export const MenuItem: FC<{
     data: menuItemStats,
   });
   const children = item.items;
-  const isEditing = false;
+
   return (
     <div
       className={cn("flex flex-col rounded-none", depth > 1 && "ml-4 md:ml-16")}

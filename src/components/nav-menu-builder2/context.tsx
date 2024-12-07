@@ -23,6 +23,11 @@ type NavMenuBuilderContextT<T extends FieldValues, AP extends ArrayPath<T>> = {
   arrayFieldById: ArrayFieldById<T, AP>;
   onAddArrayField: (arrayField: ArrayField<T, AP>, id: string) => void;
   onRemoveArrayField: (id: string) => void;
+  addEditingItemId: (id: string) => void;
+  removeEditingItemId: (id: string) => void;
+  editingItemIds: string[];
+  isEditingAllowed: boolean;
+  handleSetIsEditingAllowed: (isAllowed: boolean) => void;
 };
 
 const NavMenuBuilderContext = createContext<
@@ -57,12 +62,27 @@ const NavMenuBuilderProvider = <
     [],
   );
 
+  const addEditingItemId = (id: string) => {
+    setEditingItemIds((prev) => [...new Set([...prev, id])]);
+  };
+  const removeEditingItemId = (id: string) => {
+    setEditingItemIds((prev) => prev.filter((i) => i !== id));
+  };
+
+  const handleSetIsEditingAllowed = (isAllowed: boolean) =>
+    setIsEditingAllowed(isAllowed);
+
   return (
     <NavMenuBuilderContext.Provider
       value={{
         arrayFieldById,
         onAddArrayField,
         onRemoveArrayField,
+        addEditingItemId,
+        removeEditingItemId,
+        editingItemIds,
+        isEditingAllowed,
+        handleSetIsEditingAllowed,
       }}
     >
       {children}
@@ -104,3 +124,7 @@ export const useHandleArrayFieldById = <
   }, [id]);
 };
 
+export const useIsEditing = (id: string) => {
+  const { editingItemIds, isEditingAllowed } = useNavMenuBuilderContext();
+  return editingItemIds.includes(id) && isEditingAllowed;
+};
