@@ -34,6 +34,23 @@ export const NavMenuBuilder2 = () => {
   if (isLoading) return null;
 
   const onSave = () => {
+    let isValid = true;
+    let isDirty = false;
+
+    for (const activeForm of Object.values(formByItemId)) {
+      if (activeForm && !activeForm.formState.isValid) {
+        isValid = false;
+        activeForm.trigger();
+      }
+      if (activeForm?.formState.isDirty) isDirty = true;
+    }
+
+    if (!isValid || isDirty) {
+      toast.error(
+        "Aby zapisać menu musisz najpierw prawidłowo wypełnić i dodać wszystkie pozycje będące w trybie edycji.",
+      );
+      return;
+    }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(menuStore.menu));
     toast.success("Twoje zmiany zostały zapisane!");
   };

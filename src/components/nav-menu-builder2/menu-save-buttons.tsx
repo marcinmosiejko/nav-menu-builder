@@ -2,7 +2,7 @@ import { Button } from "@/components/button";
 import { ButtonWithConfirm } from "@/components/button-with-confirm";
 import { FC } from "react";
 
-export const MenuSubmitButtons: FC<{
+export const MenuSaveButtons: FC<{
   onReset: () => void;
   onSave: () => void;
 }> = ({ onReset, onSave }) => {
