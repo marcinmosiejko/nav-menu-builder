@@ -4,6 +4,7 @@ import { SortableContextWrap, useSortableExtended } from "../dnd";
 import { MenuItemDisplay } from "./menu-item-display";
 import { MenuItem as MenuItemT } from "../store";
 import { useIsEditing, useItemActions } from "../context";
+import { MenuItemEditor } from "./menu-item-editor";
 
 export type MenuItemStats = ReturnType<typeof getMenuItemStats>;
 export const getMenuItemStats = ({
@@ -50,8 +51,13 @@ export const MenuItem: FC<{
   parentItems: MenuItemT[];
 }> = ({ path, activeId, item, isOverlay, parentItems, parentId }) => {
   const itemId = item.id;
-  const { handleAddItem, handleEditItem, handleRemoveItem, handleSaveItem } =
-    useItemActions(itemId, path);
+  const {
+    handleAddItem,
+    handleEditItem,
+    handleRemoveItem,
+    handleSaveItem,
+    handleCancelEditItem,
+  } = useItemActions(itemId, path);
   const isEditing = useIsEditing(itemId);
   const menuItemStats = getMenuItemStats({ path, parentItems, item, parentId });
   const { depth } = menuItemStats;
@@ -69,24 +75,23 @@ export const MenuItem: FC<{
     <div
       className={cn("flex flex-col rounded-none", depth > 1 && "ml-4 md:ml-16")}
     >
-      {isEditing ? null : (
-        // <MenuItemEditor
-        //   menuItemStats={menuItemStats}
-        //   path={path}
-        //   removeItem={removeItem}
-        //   setIsEditing={setIsEditing}
-        //   valueBeforeEditing={valueBeforeEditing}
-        // />
-        <MenuItemDisplay
-          appendEmptyItem={() => {}}
-          menuItemStats={menuItemStats}
-          path={path}
+      {isEditing ? (
+        <MenuItemEditor
           item={item}
+          menuItemStats={menuItemStats}
+          onRemoveItem={handleRemoveItem}
+          onSaveItem={handleSaveItem}
+          onCancelEditItem={handleCancelEditItem}
+        />
+      ) : (
+        <MenuItemDisplay
+          item={item}
+          menuItemStats={menuItemStats}
           onRemoveItem={handleRemoveItem}
           onAddItem={handleAddItem}
           onEdititem={handleEditItem}
           sortable={sortable}
-          isBeingDragged={isDragged}
+          isDragged={isDragged}
           isOverlay={isOverlay}
         />
       )}
