@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, ReactNode, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  ReactNode,
+  useState,
+  useEffect,
+} from "react";
 import { DnDActiveWithContext } from "./dnd";
 import { getNewMenuItem, MenuItem, MenuItemPath, useMenuStore } from "./store";
 
@@ -14,21 +20,24 @@ type NavMenuBuilderContextT = {
   handleSetActiveItem: (activeItem: DnDActiveWithContext | undefined) => void;
 };
 
-const NavMenuBuilderContext = createContext<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  NavMenuBuilderContextT | undefined
->(undefined);
+const NavMenuBuilderContext = createContext<NavMenuBuilderContextT | undefined>(
+  undefined,
+);
 
 type NavMenuBuilderProviderProps = {
   children: ReactNode;
 };
 
 const NavMenuBuilderProvider = ({ children }: NavMenuBuilderProviderProps) => {
-  const [isEditingAllowed, setIsEditingAllowed] = useState(false);
+  const [isEditingAllowed, setIsEditingAllowed] = useState(true);
   const [editingItemIds, setEditingItemIds] = useState<string[]>([]);
   const [activeItem, setActiveItem] = useState<
     DnDActiveWithContext | undefined
   >(undefined);
+
+  useEffect(() => {
+    setIsEditingAllowed(!activeItem?.id);
+  }, [activeItem?.id]);
 
   const addEditingItemId = (id: string) => {
     setEditingItemIds((prev) => [...new Set([...prev, id])]);
@@ -96,6 +105,15 @@ export const useItemActions = (id: string, path: MenuItemPath) => {
   const handleRemoveItem = () => {
     menuStore.removeItem(path);
   };
+  const handleCancelEditItem = () => {
+    removeEditingItemId(id);
+  };
 
-  return { handleAddItem, handleEditItem, handleSaveItem, handleRemoveItem };
+  return {
+    handleAddItem,
+    handleEditItem,
+    handleSaveItem,
+    handleRemoveItem,
+    handleCancelEditItem,
+  };
 };

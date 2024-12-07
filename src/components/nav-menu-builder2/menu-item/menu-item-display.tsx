@@ -12,7 +12,7 @@ import { DEPTH_LIMIT } from "../nav-menu-builder";
 export const MenuItemDisplay: FC<{
   menuItemStats: MenuItemStats;
   sortable: ReturnType<typeof useSortableExtended>;
-  isBeingDragged: boolean;
+  isDragged: boolean;
   isOverlay?: boolean;
   item: MenuItemT;
   onRemoveItem: () => void;
@@ -21,7 +21,7 @@ export const MenuItemDisplay: FC<{
 }> = ({
   menuItemStats,
   sortable,
-  isBeingDragged,
+  isDragged,
   isOverlay,
   item,
   onRemoveItem,
@@ -42,7 +42,7 @@ export const MenuItemDisplay: FC<{
         depth > 1 && "mx-0 border-r-0",
         depth > 1 && (hasChildren || isItemLast) && "rounded-bl-md",
         hasChildren && "mb-0 border-b",
-        isBeingDragged && !isOverlay && "bg-primary/10 border border-r-0",
+        isDragged && !isOverlay && "bg-primary/10 border border-r-0",
         isOverlay && "ring-primary/10 ml-0 opacity-70 ring",
       )}
       style={style}
