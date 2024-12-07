@@ -59,6 +59,8 @@ export const NavMenuBuilder2 = () => {
   const [activeItem, setActiveItem] = useState<
     DnDActiveWithContext | undefined
   >(undefined);
+  const { addEditingItemId, removeEditingItemId, editingItemIds } =
+    useNavMenuBuilderContext();
   // form by default shows items in editing mode which we want to prevent on first page load, reload and rerenders caused by form reset
   const [editingAllowed, setEditingAllowed] = useState(false);
   const setAllowEditingDeferred = useCallback(
