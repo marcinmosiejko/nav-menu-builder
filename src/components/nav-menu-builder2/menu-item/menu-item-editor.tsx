@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { MenuItemBaseFields } from "./menu-item-base-fields";
 import { Button } from "@/components/button";
@@ -46,8 +46,13 @@ export const MenuItemEditor: FC<{
     resolver: zodResolver(baseMenuItemSchema),
     defaultValues: { name: item.name, link: item.link },
   });
+  const { setFocus } = form;
 
   useTrackActiveForms(item.id, form);
+
+  useEffect(() => {
+    setFocus("name");
+  }, [setFocus]);
 
   const onSubmit = (value: BaseMenuItem) => {
     onSaveItem({ ...item, ...value });
