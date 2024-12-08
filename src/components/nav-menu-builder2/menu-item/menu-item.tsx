@@ -3,7 +3,11 @@ import { cn } from "@/lib/utils";
 import { SortableContextWrap, useSortableExtended } from "../dnd";
 import { MenuItemDisplay } from "./menu-item-display";
 import { MenuItem as MenuItemT } from "../store";
-import { useIsEditing, useItemActions } from "../context";
+import {
+  useIsEditingItem,
+  useItemActions,
+  useNavMenuBuilderContext,
+} from "../context";
 import { MenuItemEditor } from "./menu-item-editor";
 
 export type MenuItemStats = ReturnType<typeof getMenuItemStats>;
@@ -58,7 +62,8 @@ export const MenuItem: FC<{
     handleSaveItem,
     handleCancelEditItem,
   } = useItemActions(itemId, path);
-  const isEditing = useIsEditing(itemId);
+  const { isDnDAllowed } = useNavMenuBuilderContext();
+  const isEditing = useIsEditingItem(itemId);
   const menuItemStats = getMenuItemStats({ path, parentItems, item, parentId });
   const { depth } = menuItemStats;
   const isDragged = !!activeId && activeId === itemId;
@@ -93,6 +98,7 @@ export const MenuItem: FC<{
           sortable={sortable}
           isDragged={isDragged}
           isOverlay={isOverlay}
+          isDnDAllowed={isDnDAllowed}
         />
       )}
 

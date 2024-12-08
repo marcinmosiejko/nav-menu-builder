@@ -13,6 +13,7 @@ export const MenuItemDisplay: FC<{
   menuItemStats: MenuItemStats;
   sortable: ReturnType<typeof useSortableExtended>;
   isDragged: boolean;
+  isDnDAllowed: boolean;
   isOverlay?: boolean;
   item: MenuItemT;
   onRemoveItem: () => void;
@@ -22,6 +23,7 @@ export const MenuItemDisplay: FC<{
   menuItemStats,
   sortable,
   isDragged,
+  isDnDAllowed,
   isOverlay,
   item,
   onRemoveItem,
@@ -49,14 +51,17 @@ export const MenuItemDisplay: FC<{
       ref={setNodeRef}
     >
       <div className="flex items-center gap-4">
-        <span
-          className="focus-visible:ring-primary ring-offset-background rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+        <Button
+          className="size-auto p-0 hover:opacity-70"
+          variant="plain"
           ref={setActivatorNodeRef}
           {...listeners}
           {...attributes}
+          aria-disabled={!isDnDAllowed}
+          disabled={!isDnDAllowed}
         >
           <ArrowsCrossIcon className="duration-250 transition-all hover:opacity-70" />
-        </span>
+        </Button>
         <div className="flex flex-col gap-2 text-sm">
           <span className="font-semibold">{item.name}</span>
           <span className="text-foreground-tertiary">{item.link}</span>

@@ -18,8 +18,7 @@ type NavMenuBuilderContextT = {
   addEditingItemId: (id: string) => void;
   removeEditingItemId: (id: string) => void;
   editingItemIds: string[];
-  isEditingAllowed: boolean;
-  handleSetIsEditingAllowed: (isAllowed: boolean) => void;
+  isDnDAllowed: boolean;
   activeItem?: DnDActiveWithContext;
   handleSetActiveItem: (activeItem: DnDActiveWithContext | undefined) => void;
   handleAddFormByItemId: (id: string, form: Form) => void;
@@ -37,7 +36,7 @@ type NavMenuBuilderProviderProps = {
 export const NavMenuBuilderProvider = ({
   children,
 }: NavMenuBuilderProviderProps) => {
-  const [isEditingAllowed, setIsEditingAllowed] = useState(true);
+  const [isDnDAllowed, setIsDnDAllowed] = useState(true);
   const [editingItemIds, setEditingItemIds] = useState<string[]>([]);
   const [formByItemId, setFormByItemId] = useState<FormByItemId>({});
   const [activeItem, setActiveItem] = useState<
@@ -45,8 +44,8 @@ export const NavMenuBuilderProvider = ({
   >(undefined);
 
   useEffect(() => {
-    setIsEditingAllowed(!activeItem?.id);
-  }, [activeItem?.id]);
+    setIsDnDAllowed(!editingItemIds.length);
+  }, [editingItemIds]);
 
   const addEditingItemId = (id: string) => {
     setEditingItemIds((prev) => [...new Set([...prev, id])]);
@@ -54,9 +53,6 @@ export const NavMenuBuilderProvider = ({
   const removeEditingItemId = (id: string) => {
     setEditingItemIds((prev) => prev.filter((i) => i !== id));
   };
-
-  const handleSetIsEditingAllowed = (isAllowed: boolean) =>
-    setIsEditingAllowed(isAllowed);
 
   const handleSetActiveItem = (activeItem: DnDActiveWithContext | undefined) =>
     setActiveItem(activeItem);
@@ -73,8 +69,7 @@ export const NavMenuBuilderProvider = ({
         addEditingItemId,
         removeEditingItemId,
         editingItemIds,
-        isEditingAllowed,
-        handleSetIsEditingAllowed,
+        isDnDAllowed,
         activeItem,
         handleSetActiveItem,
         handleAddFormByItemId,
@@ -97,9 +92,9 @@ export const useNavMenuBuilderContext = (): NavMenuBuilderContextT => {
   return ctx as NavMenuBuilderContextT;
 };
 
-export const useIsEditing = (id: string) => {
-  const { editingItemIds, isEditingAllowed } = useNavMenuBuilderContext();
-  return editingItemIds.includes(id) && isEditingAllowed;
+export const useIsEditingItem = (id: string) => {
+  const { editingItemIds } = useNavMenuBuilderContext();
+  return editingItemIds.includes(id);
 };
 
 export const useItemActions = (id: string, path: MenuItemPath) => {
