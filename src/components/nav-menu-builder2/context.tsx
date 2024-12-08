@@ -158,7 +158,11 @@ export const useIsEditingItem = (id: string) => {
   return editingItemIds.includes(id);
 };
 
-export const useItemActions = (id: string, path: MenuItemPath) => {
+export const useItemActions = (
+  id: string,
+  path: MenuItemPath,
+  prevItem: MenuItem,
+) => {
   const menuStore = useMenuStore();
   const { addEditingItemId, removeEditingItemId } = useNavMenuBuilderContext();
 
@@ -178,6 +182,10 @@ export const useItemActions = (id: string, path: MenuItemPath) => {
     menuStore.removeItem(path);
   };
   const handleCancelEditItem = () => {
+    const isNewItem = !prevItem.name;
+    if (isNewItem) {
+      menuStore.removeItem(path);
+    }
     removeEditingItemId(id);
   };
 

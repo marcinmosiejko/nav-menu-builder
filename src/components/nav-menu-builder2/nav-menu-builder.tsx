@@ -32,7 +32,7 @@ export const NavMenuBuilder2 = () => {
   const menu = menuStore.menu;
   const path: MenuItemPath = [];
 
-  const { handleAddItem } = useItemActions(menu.id, path);
+  const { handleAddItem } = useItemActions(menu.id, path, menu);
 
   const handleLastSavedDataChange = useCallback((data: Menu) => {
     setLastSavedData(data);
