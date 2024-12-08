@@ -33,7 +33,7 @@ import {
   updateNode,
 } from "./utils";
 import { MenuItem, MenuItemStats } from "./menu-item/menu-item";
-import { MenuItem as MenuItemT, MoveItem, SetItems } from "./store";
+import { MenuItem as MenuItemT, MoveItem, SetMenuItems } from "./store";
 import { createPortal } from "react-dom";
 import { useIsClient } from "@/lib/hooks";
 
@@ -53,7 +53,7 @@ export const DndContextWrap = ({
 }: {
   children: ReactNode;
   setActiveItem: (item?: DnDActiveWithContext) => void;
-  setItems: SetItems;
+  setItems: SetMenuItems;
   items: MenuItemT[];
   moveItem: MoveItem;
 }) => {
