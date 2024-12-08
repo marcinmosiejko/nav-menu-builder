@@ -61,7 +61,7 @@ export const MenuItem: FC<{
     handleRemoveItem,
     handleSaveItem,
     handleCancelEditItem,
-  } = useItemActions(itemId, path);
+  } = useItemActions(itemId, path, item);
   const { isDnDAllowed } = useNavMenuBuilderContext();
   const isEditing = useIsEditingItem(itemId);
   const menuItemStats = getMenuItemStats({ path, parentItems, item, parentId });
