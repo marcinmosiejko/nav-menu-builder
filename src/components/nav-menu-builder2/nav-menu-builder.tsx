@@ -46,7 +46,7 @@ export const NavMenuBuilder2 = () => {
   return (
     <DndContextWrap
       setActiveItem={handleSetActiveItem}
-      setItems={menuStore.setItems}
+      setItems={menuStore.setMenuItems}
       moveItem={menuStore.moveItem}
       items={menuStore.menu.items}
     >

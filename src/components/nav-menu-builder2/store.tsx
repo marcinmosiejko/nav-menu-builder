@@ -34,7 +34,7 @@ const getItemAndContext = (
   return { parentItems: current, item: current[itemIndex], itemIndex };
 };
 
-export type SetItems = (newItems: MenuItem[]) => void;
+export type SetMenuItems = (newItems: MenuItem[]) => void;
 export type MoveItem = (
   path: MenuItemPath,
   newIndex: MenuItemPath[number],
@@ -42,8 +42,8 @@ export type MoveItem = (
 
 export const useMenuStore = create<
   { menu: MenuItem } & {
-    setItems: (newItems: MenuItem[]) => void;
     setMenu: (menu: MenuItem) => void;
+    setMenuItems: SetMenuItems;
     appendItem: (path: MenuItemPath, newItem: MenuItem) => void;
     updateItem: (path: MenuItemPath, newItem: MenuItem) => void;
     removeItem: (path: MenuItemPath) => void;
@@ -62,7 +62,7 @@ export const useMenuStore = create<
         state.menu = menu;
       }),
 
-    setItems: (newItems: MenuItem[]) =>
+    setMenuItems: (newItems: MenuItem[]) =>
       set((state) => {
         state.menu.items = newItems;
       }),
