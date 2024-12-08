@@ -1,7 +1,7 @@
 import { Button } from "@/components/button";
 import ArrowLeftIcon from "@/components/icons/arrow-left-icon";
-import { NavMenuBuilderProvider as NavMenuBuilderProvider2 } from "@/components/nav-menu-builder2/context";
-import { NavMenuBuilder2 } from "@/components/nav-menu-builder2/nav-menu-builder";
+import { NavMenuBuilderProvider } from "@/components/nav-menu-builder/context";
+import { NavMenuBuilder } from "@/components/nav-menu-builder/nav-menu-builder";
 
 export default function NavMenuBuilderPage() {
   return (
@@ -13,9 +13,9 @@ export default function NavMenuBuilderPage() {
         </Button>
       </nav>
 
-      <NavMenuBuilderProvider2>
-        <NavMenuBuilder2 />
-      </NavMenuBuilderProvider2>
+      <NavMenuBuilderProvider>
+        <NavMenuBuilder />
+      </NavMenuBuilderProvider>
     </div>
   );
 }
