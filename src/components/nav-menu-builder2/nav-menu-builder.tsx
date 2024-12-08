@@ -6,7 +6,7 @@ import { buttonTextAndPadding, MenuItem } from "./menu-item/menu-item";
 import { DndContextWrap, DragOverlayPortal, SortableContextWrap } from "./dnd";
 import { cn, getStateFromLocalStorage } from "@/lib/utils";
 import { MenuEmptyState, TopMenuItemEditor } from "./components";
-import { Menu, MenuItem as MenuItemT, useMenuStore } from "./store";
+import { Menu, MenuItemPath, useMenuStore } from "./store";
 import { MenuSaveButtons } from "./menu-save-buttons";
 import { useItemActions, useNavMenuBuilderContext } from "./context";
 
@@ -30,7 +30,7 @@ export const NavMenuBuilder2 = () => {
   }, [lastSavedData, menuStore]);
 
   const menu = menuStore.menu;
-  const path = [0];
+  const path: MenuItemPath = [];
 
   const { handleAddItem } = useItemActions(menu.id, path);
 

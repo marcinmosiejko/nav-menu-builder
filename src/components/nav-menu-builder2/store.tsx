@@ -26,7 +26,7 @@ const getItemAndContext = (
   menu: Menu,
 ): { item: MenuItem; parentItems: MenuItem[]; itemIndex: number } => {
   const [parentPath, itemIndex] = [path.slice(0, -1), path.at(-1)!];
-  let current = [menu];
+  let current = menu.items;
   for (const index of parentPath) {
     current = current[index].items;
   }
@@ -69,13 +69,17 @@ export const useMenuStore = create<
 
     appendItem: (path, newItem) =>
       set((state) => {
+        if (!path.length) {
+          state.menu.items.push(newItem);
+          return;
+        }
         const { item } = getItemAndContext(path, state.menu);
         item.items.push(newItem);
       }),
 
     updateItem: (path, newItem) =>
       set((state) => {
-        if (path.length === 1) {
+        if (!path.length) {
           state.menu = newItem;
           return;
         }
@@ -85,6 +89,10 @@ export const useMenuStore = create<
 
     removeItem: (path) =>
       set((state) => {
+        if (!path.length) {
+          state.menu.items.splice(path.at(-1)!, 1);
+          return;
+        }
         const { parentItems, itemIndex } = getItemAndContext(path, state.menu);
         parentItems.splice(itemIndex, 1);
       }),

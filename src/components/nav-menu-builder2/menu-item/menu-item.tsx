@@ -25,7 +25,7 @@ export const getMenuItemStats = ({
   const parentPath = path.slice(0, -1);
 
   const parentItemsCount = parentItems?.length || 1;
-  const depth = path.length - 1;
+  const depth = path.length;
   const itemIndex = path.at(-1);
   const isItemFirst = itemIndex === 0;
   const isItemLast = itemIndex === parentItemsCount - 1;
