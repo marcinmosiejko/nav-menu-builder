@@ -5,15 +5,16 @@ import { useCallback, useEffect, useState } from "react";
 import { buttonTextAndPadding, MenuItem } from "./menu-item/menu-item";
 import { DndContextWrap, DragOverlayPortal, SortableContextWrap } from "./dnd";
 import { cn, getStateFromLocalStorage } from "@/lib/utils";
-import { MenuEmptyState, TopMenuItemEditor } from "./components";
+import { MenuEmptyState } from "./menu-empty-state";
 import { Menu, MenuItemPath, useMenuStore } from "./store";
 import { MenuSaveButtons } from "./menu-save-buttons";
 import { useItemActions, useNavMenuBuilderContext } from "./context";
+import { TopItemEditor } from "./top-item-editor";
 
 export const STORAGE_KEY = "menuItems";
 export const DEPTH_LIMIT = 7;
 
-export const NavMenuBuilder2 = () => {
+export const NavMenuBuilder = () => {
   const menuStore = useMenuStore();
   const [isLoading, setIsLoading] = useState(true);
   const { activeItem, handleSetActiveItem } = useNavMenuBuilderContext();
@@ -53,7 +54,7 @@ export const NavMenuBuilder2 = () => {
       <div className="space-y-6">
         <h1 className="text-xl font-bold md:text-2xl">Dodaj nawigację</h1>
         <div className="flex flex-col gap-6">
-          <TopMenuItemEditor item={menu} />
+          <TopItemEditor item={menu} />
           <div className="bg-background border-border flex flex-col gap-6 rounded-md border p-6">
             <div className="flex flex-col items-start gap-2 md:flex-row md:justify-between md:gap-0">
               <h2 className="font-semibold">Pozycje menu</h2>
