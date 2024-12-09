@@ -8,9 +8,9 @@ import { useNavMenuBuilderContext } from "./context";
 import isEqual from "lodash.isequal";
 
 export const MenuSaveButtons: FC<{
-  lastSavedData?: Menu;
+  lastSavedOrInitData?: Menu;
   onLastSavedDataChange: (data: Menu) => void;
-}> = ({ lastSavedData, onLastSavedDataChange }) => {
+}> = ({ lastSavedOrInitData, onLastSavedDataChange }) => {
   const { formsByItemId, editingItemIds, basicFormsStateByItemId } =
     useNavMenuBuilderContext();
   const menuStore = useMenuStore();
@@ -19,8 +19,8 @@ export const MenuSaveButtons: FC<{
     const hasDirtyForm = Object.values(basicFormsStateByItemId).some(
       (state) => state.isDirty,
     );
-    return hasDirtyForm || !isEqual(lastSavedData, menuStore.menu);
-  }, [menuStore.menu, lastSavedData, basicFormsStateByItemId]);
+    return hasDirtyForm || !isEqual(lastSavedOrInitData, menuStore.menu);
+  }, [menuStore.menu, lastSavedOrInitData, basicFormsStateByItemId]);
 
   const handleOnSave = () => {
     let isValid = true;
@@ -49,7 +49,7 @@ export const MenuSaveButtons: FC<{
   };
 
   const handleOnReset = () => {
-    if (lastSavedData) menuStore.setMenu(lastSavedData);
+    if (lastSavedOrInitData) menuStore.setMenu(lastSavedOrInitData);
     toast.success("Twoje zmiany zostały cofnięte!");
   };
 

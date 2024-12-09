@@ -18,17 +18,21 @@ export const NavMenuBuilder = () => {
   const menuStore = useMenuStore();
   const [isLoading, setIsLoading] = useState(true);
   const { activeItem, handleSetActiveItem } = useNavMenuBuilderContext();
-  const [lastSavedData, setLastSavedData] = useState<Menu | undefined>();
+  const [lastSavedOrInitData, setLastSavedOrInitData] = useState<
+    Menu | undefined
+  >();
 
   useEffect(() => {
-    if (lastSavedData) return;
+    if (lastSavedOrInitData) return;
     const lastSaved = getStateFromLocalStorage<Menu>(STORAGE_KEY);
     if (lastSaved) {
-      setLastSavedData(lastSaved);
+      setLastSavedOrInitData(lastSaved);
       menuStore.setMenu(lastSaved);
+    } else {
+      setLastSavedOrInitData(menuStore.menu);
     }
     setIsLoading(false);
-  }, [lastSavedData, menuStore]);
+  }, [lastSavedOrInitData, menuStore]);
 
   const menu = menuStore.menu;
   const path: MenuItemPath = [];
@@ -36,7 +40,7 @@ export const NavMenuBuilder = () => {
   const { handleAddItem } = useItemActions(menu.id, path, menu);
 
   const handleLastSavedDataChange = useCallback((data: Menu) => {
-    setLastSavedData(data);
+    setLastSavedOrInitData(data);
   }, []);
 
   // No loading skeleton for this as data loads too quickly for it to make sense. But it prevents from rendering empty menu for a split second before the data comes in.
@@ -90,7 +94,7 @@ export const NavMenuBuilder = () => {
             </div>
           </div>
           <MenuSaveButtons
-            lastSavedData={lastSavedData}
+            lastSavedOrInitData={lastSavedOrInitData}
             onLastSavedDataChange={handleLastSavedDataChange}
           />
         </div>
