@@ -44,7 +44,7 @@ export const getMenuItemStats = ({
   };
 };
 
-export const buttonTextAndPadding = "px-2 text-xs md:px-[14px] md:text-sm";
+export const buttonTextAndPadding = "";
 
 export const MenuItem: FC<{
   parentId: string;
