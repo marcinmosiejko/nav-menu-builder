@@ -52,7 +52,7 @@ export const MenuItemDisplay: FC<{
     >
       <div className="flex items-center gap-4">
         <Button
-          className="size-auto p-0 hover:opacity-70"
+          className="size-auto p-0 hover:opacity-70 md:p-0"
           variant="plain"
           ref={setActivatorNodeRef}
           {...listeners}
