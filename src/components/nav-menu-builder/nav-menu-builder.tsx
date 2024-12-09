@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/button";
 import { useCallback, useEffect, useState } from "react";
-import { buttonTextAndPadding, MenuItem } from "./menu-item/menu-item";
+import { MenuItem } from "./menu-item/menu-item";
 import { DndContextWrap, DragOverlayPortal, SortableContextWrap } from "./dnd";
 import { cn, getStateFromLocalStorage } from "@/lib/utils";
 import { MenuEmptyState } from "./menu-empty-state";
@@ -80,7 +80,7 @@ export const NavMenuBuilder = () => {
                   </SortableContextWrap>
                   <div className="bg-background-tertiary border-border-secondary rounded-md rounded-t-none border-t">
                     <Button
-                      className={cn(buttonTextAndPadding, "m-4 md:m-6")}
+                      className={cn("m-4 md:m-6")}
                       variant="secondary"
                       onClick={handleAddItem}
                     >
