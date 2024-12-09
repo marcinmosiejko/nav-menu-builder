@@ -11,8 +11,12 @@ export const MenuSaveButtons: FC<{
   lastSavedOrInitData?: Menu;
   onLastSavedDataChange: (data: Menu) => void;
 }> = ({ lastSavedOrInitData, onLastSavedDataChange }) => {
-  const { formsByItemId, editingItemIds, basicFormsStateByItemId } =
-    useNavMenuBuilderContext();
+  const {
+    formsByItemId,
+    editingItemIds,
+    basicFormsStateByItemId,
+    clearEditingItemIds,
+  } = useNavMenuBuilderContext();
   const menuStore = useMenuStore();
 
   const hasChangesInMenuStore = useMemo(() => {
@@ -49,7 +53,16 @@ export const MenuSaveButtons: FC<{
   };
 
   const handleOnReset = () => {
-    if (lastSavedOrInitData) menuStore.setMenu(lastSavedOrInitData);
+    if (lastSavedOrInitData) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(lastSavedOrInitData));
+      menuStore.setMenu(lastSavedOrInitData);
+      const topItemForm = formsByItemId[menuStore.menu.id];
+      topItemForm.reset({
+        name: menuStore.menu.name,
+        link: menuStore.menu.link,
+      });
+      clearEditingItemIds();
+    }
     toast.success("Twoje zmiany zostały cofnięte!");
   };
 
