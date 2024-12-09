@@ -44,8 +44,6 @@ export const getMenuItemStats = ({
   };
 };
 
-export const buttonTextAndPadding = "";
-
 export const MenuItem: FC<{
   parentId: string;
   path: number[];

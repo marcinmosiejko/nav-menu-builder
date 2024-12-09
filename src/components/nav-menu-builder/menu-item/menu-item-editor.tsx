@@ -5,7 +5,7 @@ import { Button } from "@/components/button";
 import { ButtonWithConfirm } from "@/components/button-with-confirm";
 import BinIcon from "@/components/icons/bin-icon";
 import { useForm, useFormState } from "react-hook-form";
-import { buttonTextAndPadding, MenuItemStats } from "./menu-item";
+import { MenuItemStats } from "./menu-item";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BaseMenuItem, baseMenuItemSchema } from "../schema";
 import { MenuItem } from "../store";
@@ -20,7 +20,6 @@ const SubmitButton = () => {
 
   return (
     <Button
-      className={buttonTextAndPadding}
       variant="secondary-color"
       disabled={!formState.isValid}
       type="submit"
@@ -85,11 +84,7 @@ export const MenuItemEditor: FC<{
             />
           </div>
           <div className="w-full space-x-2 text-right md:text-left">
-            <Button
-              className={buttonTextAndPadding}
-              variant="secondary"
-              onClick={onCancelEditItem}
-            >
+            <Button variant="secondary" onClick={onCancelEditItem}>
               Anuluj
             </Button>
             <SubmitButton />

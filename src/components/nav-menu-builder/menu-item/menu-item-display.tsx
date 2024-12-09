@@ -1,13 +1,13 @@
 import { FC } from "react";
-import { MenuItem as MenuItemT } from "@/components/nav-menu-builder/schema";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/button";
 import { ButtonWithConfirm } from "@/components/button-with-confirm";
 import ArrowsCrossIcon from "@/components/icons/arrows-cross-icon";
 import { useSortableExtended } from "../dnd";
-import { buttonTextAndPadding, MenuItemStats } from "./menu-item";
+import { MenuItemStats } from "./menu-item";
 import { confirmRemoveDescription } from "./menu-item-editor";
 import { DEPTH_LIMIT } from "../nav-menu-builder";
+import { MenuItem } from "../store";
 
 export const MenuItemDisplay: FC<{
   menuItemStats: MenuItemStats;
@@ -15,7 +15,7 @@ export const MenuItemDisplay: FC<{
   isDragged: boolean;
   isDnDAllowed: boolean;
   isOverlay?: boolean;
-  item: MenuItemT;
+  item: MenuItem;
   onRemoveItem: () => void;
   onAddItem: () => void;
   onEdititem: () => void;
@@ -70,7 +70,6 @@ export const MenuItemDisplay: FC<{
       <div className="md:text-auto w-full text-right md:w-auto">
         <Button
           className={cn(
-            buttonTextAndPadding,
             "rounded-r-none border-r-transparent focus-visible:relative",
           )}
           onClick={onEdititem}
@@ -82,7 +81,6 @@ export const MenuItemDisplay: FC<{
           TriggerBody={
             <Button
               className={cn(
-                buttonTextAndPadding,
                 "rounded-none focus-visible:relative",
                 !showAddItemButton && "rounded-r-md",
               )}
@@ -96,10 +94,7 @@ export const MenuItemDisplay: FC<{
         />
         {showAddItemButton && (
           <Button
-            className={cn(
-              buttonTextAndPadding,
-              "rounded-l-none border-l-transparent",
-            )}
+            className={cn("rounded-l-none border-l-transparent")}
             onClick={onAddItem}
             variant="secondary"
           >
