@@ -1,55 +1,39 @@
-import { Dispatch, FC, SetStateAction } from "react";
-import {
-  BaseMenu,
-  MenuItem as MenuItemT,
-  MenuItemPath,
-} from "@/components/nav-menu-builder/schema";
+import { FC } from "react";
+import { MenuItem as MenuItemT } from "@/components/nav-menu-builder/schema";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/button";
 import { ButtonWithConfirm } from "@/components/button-with-confirm";
 import ArrowsCrossIcon from "@/components/icons/arrows-cross-icon";
-import { useFormContext, useWatch } from "react-hook-form";
 import { useSortableExtended } from "../dnd";
 import { buttonTextAndPadding, MenuItemStats } from "./menu-item";
 import { confirmRemoveDescription } from "./menu-item-editor";
 import { DEPTH_LIMIT } from "../nav-menu-builder";
 
 export const MenuItemDisplay: FC<{
-  setIsEditing: Dispatch<SetStateAction<boolean>>;
-  setValueBeforeEditing: Dispatch<SetStateAction<BaseMenu | null>>;
-  valueBeforeEditing: BaseMenu | null;
-  removeItem: () => void;
-  path: MenuItemPath;
-  appendEmptyItem: () => void;
   menuItemStats: MenuItemStats;
   sortable: ReturnType<typeof useSortableExtended>;
-  isBeingDragged: boolean;
+  isDragged: boolean;
+  isDnDAllowed: boolean;
   isOverlay?: boolean;
+  item: MenuItemT;
+  onRemoveItem: () => void;
+  onAddItem: () => void;
+  onEdititem: () => void;
 }> = ({
-  setValueBeforeEditing,
-  setIsEditing,
-  removeItem,
-  path,
-  appendEmptyItem,
   menuItemStats,
   sortable,
-  isBeingDragged,
+  isDragged,
+  isDnDAllowed,
   isOverlay,
+  item,
+  onRemoveItem,
+  onAddItem,
+  onEdititem,
 }) => {
-  const { control } = useFormContext<MenuItemT>();
-  const item = useWatch({ name: path, control });
   const { depth, isItemFirst, hasChildren, isItemLast } = menuItemStats;
-  const { attributes, listeners, setActivatorNodeRef } = sortable;
+  const { attributes, listeners, setActivatorNodeRef, setNodeRef, style } =
+    sortable;
   const showAddItemButton = depth < DEPTH_LIMIT;
-
-  const onEdit = () => {
-    setValueBeforeEditing({
-      id: item.id,
-      name: item.name,
-      link: item.link,
-    });
-    setIsEditing(true);
-  };
 
   return (
     <div
@@ -60,22 +44,27 @@ export const MenuItemDisplay: FC<{
         depth > 1 && "mx-0 border-r-0",
         depth > 1 && (hasChildren || isItemLast) && "rounded-bl-md",
         hasChildren && "mb-0 border-b",
-        isBeingDragged && !isOverlay && "bg-primary/10 border border-r-0",
+        isDragged && !isOverlay && "bg-primary/10 border border-r-0",
         isOverlay && "ring-primary/10 ml-0 opacity-70 ring",
       )}
+      style={style}
+      ref={setNodeRef}
     >
       <div className="flex items-center gap-4">
-        <span
-          className="focus-visible:ring-primary ring-offset-background rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+        <Button
+          className="size-auto p-0 hover:opacity-70 md:p-0"
+          variant="plain"
           ref={setActivatorNodeRef}
           {...listeners}
           {...attributes}
+          aria-disabled={!isDnDAllowed}
+          disabled={!isDnDAllowed}
         >
           <ArrowsCrossIcon className="duration-250 transition-all hover:opacity-70" />
-        </span>
+        </Button>
         <div className="flex flex-col gap-2 text-sm">
-          <span className="font-semibold">{item?.name}</span>
-          <span className="text-foreground-tertiary">{item?.link}</span>
+          <span className="font-semibold">{item.name}</span>
+          <span className="text-foreground-tertiary">{item.link}</span>
         </div>
       </div>
       <div className="md:text-auto w-full text-right md:w-auto">
@@ -84,7 +73,7 @@ export const MenuItemDisplay: FC<{
             buttonTextAndPadding,
             "rounded-r-none border-r-transparent focus-visible:relative",
           )}
-          onClick={onEdit}
+          onClick={onEdititem}
           variant="secondary"
         >
           Edytuj
@@ -102,7 +91,7 @@ export const MenuItemDisplay: FC<{
               Usuń
             </Button>
           }
-          onConfirm={removeItem}
+          onConfirm={onRemoveItem}
           description={confirmRemoveDescription}
         />
         {showAddItemButton && (
@@ -111,7 +100,7 @@ export const MenuItemDisplay: FC<{
               buttonTextAndPadding,
               "rounded-l-none border-l-transparent",
             )}
-            onClick={appendEmptyItem}
+            onClick={onAddItem}
             variant="secondary"
           >
             <span>Dodaj</span>

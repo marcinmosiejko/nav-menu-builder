@@ -9,13 +9,13 @@ import { Input } from "@/components/input";
 import { InputWithIcon } from "@/components/input-with-icon";
 import SearchIcon from "@/components/icons/search-icon";
 import { useFormContext } from "react-hook-form";
-import { type MenuItem as MenuItemT } from "../schema";
+import { BaseMenuItem } from "../schema";
 
 export const MenuItemBaseFields: React.FC<{
   nameFieldProps: { label: string; placeholder: string; name: "name" };
   linkFieldProps: { name: "link" };
 }> = ({ nameFieldProps, linkFieldProps }) => {
-  const form = useFormContext<MenuItemT>();
+  const form = useFormContext<BaseMenuItem>();
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // 'Enter' keydown in input triggers onClick of an edit button of the first menu item, not sure why this would happen
