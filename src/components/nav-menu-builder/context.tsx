@@ -24,6 +24,7 @@ type BasicFormsStateByItemId = Record<string, BasicFormState>;
 type NavMenuBuilderContextT = {
   addEditingItemId: (id: string) => void;
   removeEditingItemId: (id: string) => void;
+  clearEditingItemIds: () => void;
   // doesn't include top menu item form, as it's always in editing mode
   editingItemIds: string[];
   isDnDAllowed: boolean;
@@ -69,6 +70,7 @@ export const NavMenuBuilderProvider = ({
   const removeEditingItemId = (id: string) => {
     setEditingItemIds((prev) => prev.filter((i) => i !== id));
   };
+  const clearEditingItemIds = () => setEditingItemIds([]);
 
   const handleSetActiveItem = (activeItem: DnDActiveWithContext | undefined) =>
     setActiveItem(activeItem);
@@ -128,6 +130,7 @@ export const NavMenuBuilderProvider = ({
         editingItemIds,
         addEditingItemId,
         removeEditingItemId,
+        clearEditingItemIds,
 
         formsByItemId,
         handleAddFormByItemId,
