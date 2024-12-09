@@ -35,6 +35,12 @@ dependencies:
   clsx:
     specifier: ^2.1.1
     version: 2.1.1
+  immer:
+    specifier: ^10.1.1
+    version: 10.1.1
+  lodash.isequal:
+    specifier: ^4.5.0
+    version: 4.5.0
   lucide-react:
     specifier: ^0.462.0
     version: 0.462.0(react@19.0.0-rc-66855b96-20241106)
@@ -62,6 +68,9 @@ dependencies:
   zod:
     specifier: ^3.23.8
     version: 3.23.8
+  zustand:
+    specifier: ^5.0.2
+    version: 5.0.2(@types/react@18.3.12)(immer@10.1.1)(react@19.0.0-rc-66855b96-20241106)
 
 devDependencies:
   '@types/node':
@@ -2219,6 +2228,10 @@ packages:
     engines: {node: '>= 4'}
     dev: true
 
+  /immer@10.1.1:
+    resolution: {integrity: sha512-s2MPrmjovJcoMaHtx6K11Ra7oD05NT97w1IC5zpMkT6Atjr7H8LjaDd81iIxUYpMKSRRNMJE703M1Fhr/TctHw==}
+    dev: false
+
   /import-fresh@3.3.0:
     resolution: {integrity: sha512-veYYhQa+D1QBKznvhUHxb8faxlrwUnxseDAbAp457E0wLNio2bOSKnjYDhMj+YiAq61xrMGhQk9iXVk5FzgQMw==}
     engines: {node: '>=6'}
@@ -2569,6 +2582,10 @@ packages:
     dependencies:
       p-locate: 5.0.0
     dev: true
+
+  /lodash.isequal@4.5.0:
+    resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
+    dev: false
 
   /lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
@@ -3785,4 +3802,27 @@ packages:
 
   /zod@3.23.8:
     resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
+    dev: false
+
+  /zustand@5.0.2(@types/react@18.3.12)(immer@10.1.1)(react@19.0.0-rc-66855b96-20241106):
+    resolution: {integrity: sha512-8qNdnJVJlHlrKXi50LDqqUNmUbuBjoKLrYQBnoChIbVph7vni+sY+YpvdjXG9YLd/Bxr6scMcR+rm5H3aSqPaw==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=18.0.0'
+      immer: '>=9.0.6'
+      react: '>=18.0.0'
+      use-sync-external-store: '>=1.2.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+      use-sync-external-store:
+        optional: true
+    dependencies:
+      '@types/react': 18.3.12
+      immer: 10.1.1
+      react: 19.0.0-rc-66855b96-20241106
     dev: false

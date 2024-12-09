@@ -4,6 +4,7 @@ import {
   DndContext,
   DragEndEvent,
   DragOverEvent,
+  DragOverlay,
   DragStartEvent,
   KeyboardSensor,
   MouseSensor,
@@ -21,8 +22,6 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { FC, ReactNode } from "react";
-import { MenuItem } from "./schema";
-import { UseFormReturn } from "react-hook-form";
 import { CSS } from "@dnd-kit/utilities";
 import {
   addNode,
@@ -33,32 +32,31 @@ import {
   removeNode,
   updateNode,
 } from "./utils";
-import { MenuItemStats } from "./menu-item/menu-item";
-import { useNavMenuBuilderContext } from "./context";
+import { MenuItem, MenuItemStats } from "./menu-item/menu-item";
+import { MenuItem as MenuItemT, MoveItem, SetMenuItems } from "./store";
+import { createPortal } from "react-dom";
+import { useIsClient } from "@/lib/hooks";
 
 export type DnDItemWithContext<T> = T & {
   id: string;
-  data: DataRef<MenuItemStats & { item: MenuItem }>;
+  data: DataRef<MenuItemStats & { item: MenuItemT }>;
 };
 export type DnDActiveWithContext = DnDItemWithContext<Active>;
 export type DnDOverWithContext = DnDItemWithContext<Over>;
 
-export const DndContextWrap = <A extends Active>({
+export const DndContextWrap = ({
   children,
-  beforeOnDragStart,
-  afterOnDragEnd,
   setActiveItem,
-  form,
-  allowHandleDragOver,
+  setItems,
+  items,
+  moveItem,
 }: {
   children: ReactNode;
-  form: UseFormReturn<MenuItem, unknown, undefined>;
-  beforeOnDragStart: () => void;
-  afterOnDragEnd: () => void;
-  setActiveItem: (item: A | null) => void;
-  allowHandleDragOver: boolean;
+  setActiveItem: (item?: DnDActiveWithContext) => void;
+  setItems: SetMenuItems;
+  items: MenuItemT[];
+  moveItem: MoveItem;
 }) => {
-  const { arrayFieldById } = useNavMenuBuilderContext();
   const sensors = useSensors(
     useSensor(MouseSensor),
     useSensor(TouchSensor),
@@ -68,8 +66,7 @@ export const DndContextWrap = <A extends Active>({
   );
 
   const handleDragStart = ({ active }: DragStartEvent) => {
-    beforeOnDragStart();
-    setActiveItem(active as unknown as A);
+    setActiveItem(active as unknown as DnDActiveWithContext);
   };
 
   const handleDragOver = (event: DragOverEvent) => {
@@ -80,18 +77,13 @@ export const DndContextWrap = <A extends Active>({
       return false;
     }
 
-    const newFormValues = structuredClone(form.getValues());
-    let newItems = newFormValues.items;
+    let newItems = structuredClone(items);
+
     const activeId = active.id as string;
     const overId = over.id as string;
 
     const overParentId = getParentId(overId, newItems);
     const activeParentId = getParentId(activeId, newItems);
-
-    if (overParentId === activeParentId) {
-      // d&d within parent is handled in handleDragEnd
-      return false;
-    }
 
     const activeItem = getItem(activeId, newItems)!;
 
@@ -107,6 +99,7 @@ export const DndContextWrap = <A extends Active>({
       const items = getParentArray(overId, newItems)!;
 
       // Ensure drop of sortItem into sortable occurs once
+      // This prevents move within same level (except for top items) which is done in handleDragEnd
       if (items.find((item) => item.id === activeId)) {
         return false;
       }
@@ -121,13 +114,13 @@ export const DndContextWrap = <A extends Active>({
         // Move to new place
         const activeOverId = getParentId(overId, newItems);
         const parentItems =
-          getParentItems<MenuItem[]>(activeOverId, newItems) || [];
+          getParentItems<MenuItemT[]>(activeOverId, newItems) || [];
         const activeIndex = parentItems?.findIndex(
           (item) => item.id === activeId,
         );
         const overIndex = parentItems.findIndex((item) => item.id === overId);
         const moveItems = arrayMove(parentItems, activeIndex, overIndex);
-        newItems = updateNode<MenuItem[]>(newItems, activeOverId, moveItems);
+        newItems = updateNode<MenuItemT[]>(newItems, activeOverId, moveItems);
       } else {
         // Remove from original
         removeNode(activeId, newItems);
@@ -146,40 +139,35 @@ export const DndContextWrap = <A extends Active>({
       }
     }
 
-    form.reset({ ...newFormValues, items: newItems });
+    setItems(newItems);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
-    setActiveItem(null);
+    setActiveItem(undefined);
+
     const active = event.active as DnDActiveWithContext;
     const over = event.over as DnDOverWithContext | undefined;
 
     if (!over) return null;
 
-    if (over?.id && active.id !== over.id) {
+    if (over.id && active.id !== over.id) {
       const activeCtx = active.data.current!;
       const overCtx = over.data.current!;
 
       const activePath = activeCtx.path;
-      const overPath = overCtx.path;
+      const newIndex = overCtx.path.at(-1)!;
 
-      const activeParentPath = activeCtx.parentPath;
-      const overParentPath = overCtx.parentPath;
+      const activeParentId = activeCtx.parentId;
+      const overParentId = overCtx.parentId;
 
-      if (activeParentPath !== overParentPath) return false;
-      const item = form.getValues(activeParentPath);
-      const arrayField = arrayFieldById[item.id]!;
-      const activeIndex = parseInt(activePath.split(".").at(-1)!, 10);
-      const overIndex = parseInt(overPath.split(".").at(-1)!, 10);
+      if (activeParentId !== overParentId) return false;
 
-      arrayField.swap(activeIndex, overIndex);
+      moveItem(activePath, newIndex);
     }
-    afterOnDragEnd();
   };
 
   const handleDragCancel = () => {
-    setActiveItem(null);
-    afterOnDragEnd();
+    setActiveItem(undefined);
   };
 
   return (
@@ -189,7 +177,7 @@ export const DndContextWrap = <A extends Active>({
       onDragEnd={handleDragEnd}
       onDragStart={handleDragStart}
       onDragCancel={handleDragCancel}
-      onDragOver={allowHandleDragOver ? handleDragOver : undefined}
+      onDragOver={handleDragOver}
     >
       {children}
     </DndContext>
@@ -197,7 +185,7 @@ export const DndContextWrap = <A extends Active>({
 };
 
 export const SortableContextWrap: FC<{
-  items: MenuItem[];
+  items: MenuItemT[];
   children: ReactNode;
 }> = ({ items, children }) => {
   return (
@@ -210,13 +198,37 @@ export const SortableContextWrap: FC<{
 type Argument = Parameters<typeof useSortable>[0];
 export const useSortableExtended = (args: Argument) => {
   const sortable = useSortable(args);
-  const { transform, transition } = sortable;
+  const { transform } = sortable;
 
   return {
     ...sortable,
     style: {
       transform: CSS.Translate.toString(transform),
-      transition,
     },
   };
+};
+
+export const DragOverlayPortal: FC<{ activeItem?: DnDActiveWithContext }> = ({
+  activeItem,
+}) => {
+  const isClient = useIsClient();
+
+  // Portal can't be run in SSR so we need to render only on client
+  if (!isClient) return null;
+
+  return createPortal(
+    <DragOverlay>
+      {activeItem && (
+        <MenuItem
+          activeId={activeItem.id}
+          item={activeItem.data.current!.item}
+          path={[0]}
+          parentId={activeItem.data.current!.parentId}
+          parentItems={activeItem.data.current!.parentItems}
+          isOverlay
+        />
+      )}
+    </DragOverlay>,
+    document.body,
+  );
 };

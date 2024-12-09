@@ -1,37 +1,35 @@
-import { FC, useEffect, useState } from "react";
-import {
-  BaseMenu,
-  MenuItem as MenuItemT,
-  MenuItemPath,
-} from "@/components/nav-menu-builder/schema";
-import { useMenuItemsArray } from "../useMenuItemsArray";
+import { FC } from "react";
 import { cn } from "@/lib/utils";
-import {
-  UseFieldArrayRemove,
-  useFormContext,
-  UseFormReturn,
-} from "react-hook-form";
 import { SortableContextWrap, useSortableExtended } from "../dnd";
-import { MenuItemEditor } from "./menu-item-editor";
 import { MenuItemDisplay } from "./menu-item-display";
-import { useHandleArrayFieldById } from "../context";
+import { MenuItem as MenuItemT } from "../store";
+import {
+  useIsEditingItem,
+  useItemActions,
+  useNavMenuBuilderContext,
+} from "../context";
+import { MenuItemEditor } from "./menu-item-editor";
 
 export type MenuItemStats = ReturnType<typeof getMenuItemStats>;
-export const getMenuItemStats = (
-  path: MenuItemPath,
-  form: UseFormReturn<MenuItemT, unknown, undefined>,
-) => {
-  const item = form.getValues(path);
-  const parentPath = (path.split(".").slice(0, -2).join(".") ||
-    undefined) as MenuItemPath;
-  const parentItems = form.getValues(parentPath)?.items;
+export const getMenuItemStats = ({
+  path,
+  parentItems,
+  item,
+  parentId,
+}: {
+  item: MenuItemT;
+  path: number[];
+  parentItems: MenuItemT[];
+  parentId: string;
+}) => {
+  const parentPath = path.slice(0, -1);
+
   const parentItemsCount = parentItems?.length || 1;
-  const depth = path.split(".").length / 2;
-  const itemIndex = Number(path.split(".").at(-1)!);
+  const depth = path.length;
+  const itemIndex = path.at(-1);
   const isItemFirst = itemIndex === 0;
   const isItemLast = itemIndex === parentItemsCount - 1;
-  const hasChildren = !!form.getValues((path || undefined) as MenuItemPath)
-    ?.items.length;
+  const hasChildren = item.items.length;
   return {
     path,
     parentPath,
@@ -42,96 +40,84 @@ export const getMenuItemStats = (
     hasChildren,
     hasSiblings: parentItemsCount > 1,
     item,
+    parentId,
   };
 };
 
-export const buttonTextAndPadding = "px-2 text-xs md:px-[14px] md:text-sm";
+export const buttonTextAndPadding = "";
 
 export const MenuItem: FC<{
   parentId: string;
-  path: MenuItemPath;
-  removeItem: UseFieldArrayRemove;
-  allowEditing: boolean;
+  path: number[];
   activeId?: string;
   isOverlay?: boolean;
-}> = ({ path, parentId, removeItem, allowEditing, activeId, isOverlay }) => {
-  const [isEditing, setIsEditing] = useState(allowEditing ? true : false);
-  const [valueBeforeEditing, setValueBeforeEditing] = useState<BaseMenu | null>(
-    null,
-  );
-
-  const form = useFormContext<MenuItemT>();
-  const arrayField = useMenuItemsArray(form, path);
-  const { fields, appendEmptyItem, remove: removeChild } = arrayField;
-  const item = form.getValues(path);
-  const itemId = item?.id;
-
-  useEffect(() => {
-    if (!allowEditing) setIsEditing(false);
-  }, [allowEditing]);
-
-  useHandleArrayFieldById(arrayField, itemId);
-
-  const menuItemStats = getMenuItemStats(path, form);
+  item: MenuItemT;
+  parentItems: MenuItemT[];
+}> = ({ path, activeId, item, isOverlay, parentItems, parentId }) => {
+  const itemId = item.id;
+  const {
+    handleAddItem,
+    handleEditItem,
+    handleRemoveItem,
+    handleSaveItem,
+    handleCancelEditItem,
+  } = useItemActions(itemId, path, item);
+  const { isDnDAllowed } = useNavMenuBuilderContext();
+  const isEditing = useIsEditingItem(itemId);
+  const menuItemStats = getMenuItemStats({ path, parentItems, item, parentId });
   const { depth } = menuItemStats;
-  const isBeingDragged = !!activeId && activeId === itemId;
+  const isDragged = !!activeId && activeId === itemId;
 
   const sortable = useSortableExtended({
     id: itemId,
     transition: null,
-    data: { ...menuItemStats, parentId },
+    disabled: activeId === item.id,
+    data: menuItemStats,
   });
+  const children = item.items;
 
   return (
-    <div style={sortable.style} ref={sortable.setNodeRef}>
-      <div
-        className={cn(
-          "flex flex-col rounded-none",
-          depth > 1 && "ml-4 md:ml-16",
-        )}
-      >
-        {isEditing ? (
-          <MenuItemEditor
-            menuItemStats={menuItemStats}
-            path={path}
-            removeItem={removeItem}
-            setIsEditing={setIsEditing}
-            valueBeforeEditing={valueBeforeEditing}
-          />
-        ) : (
-          <MenuItemDisplay
-            appendEmptyItem={appendEmptyItem}
-            menuItemStats={menuItemStats}
-            path={path}
-            removeItem={removeItem}
-            setIsEditing={setIsEditing}
-            setValueBeforeEditing={setValueBeforeEditing}
-            valueBeforeEditing={valueBeforeEditing}
-            sortable={sortable}
-            isBeingDragged={isBeingDragged}
-            isOverlay={isOverlay}
-          />
-        )}
+    <div
+      className={cn("flex flex-col rounded-none", depth > 1 && "ml-4 md:ml-16")}
+    >
+      {isEditing ? (
+        <MenuItemEditor
+          item={item}
+          menuItemStats={menuItemStats}
+          onRemoveItem={handleRemoveItem}
+          onSaveItem={handleSaveItem}
+          onCancelEditItem={handleCancelEditItem}
+        />
+      ) : (
+        <MenuItemDisplay
+          item={item}
+          menuItemStats={menuItemStats}
+          onRemoveItem={handleRemoveItem}
+          onAddItem={handleAddItem}
+          onEdititem={handleEditItem}
+          sortable={sortable}
+          isDragged={isDragged}
+          isOverlay={isOverlay}
+          isDnDAllowed={isDnDAllowed}
+        />
+      )}
 
-        {!isBeingDragged && (
-          <div className="bg-background-secondary">
-            <SortableContextWrap items={item?.items || []}>
-              {fields.map((field, index) => (
-                <div key={field.id}>
-                  <MenuItem
-                    parentId={itemId}
-                    path={`${path}.items.${index}` as MenuItemPath}
-                    removeItem={() => removeChild(index)}
-                    allowEditing={allowEditing}
-                    activeId={activeId}
-                    isOverlay={isOverlay}
-                  />
-                </div>
-              ))}
-            </SortableContextWrap>
-          </div>
-        )}
-      </div>
+      {!isDragged && (
+        <div className="bg-background-secondary">
+          <SortableContextWrap items={children}>
+            {children.map((child, index) => (
+              <MenuItem
+                key={child.id}
+                parentId={itemId}
+                item={child}
+                path={[...path, index]}
+                activeId={activeId}
+                parentItems={children}
+              />
+            ))}
+          </SortableContextWrap>
+        </div>
+      )}
     </div>
   );
 };

@@ -12,6 +12,7 @@ export default function NavMenuBuilderPage() {
           Wróć do listy nawigacji
         </Button>
       </nav>
+
       <NavMenuBuilderProvider>
         <NavMenuBuilder />
       </NavMenuBuilderProvider>
