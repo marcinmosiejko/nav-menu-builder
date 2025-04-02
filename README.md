@@ -23,7 +23,7 @@
 
 ## Features
 
-- Drag & Drop created menu items
+- Drag & Drop menu items
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 <br />
@@ -48,7 +48,7 @@
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/mosiej803/coin-trakker-app
+   git clone https://github.com/marcinmosiejko/nav-menu-builder
    ```
 2. Install NPM packages
    ```sh
